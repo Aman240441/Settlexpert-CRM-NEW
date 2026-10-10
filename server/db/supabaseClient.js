@@ -64,22 +64,14 @@ async function deleteRecord(table, id) {
 function startLiveSyncWorker(db, intervalMs = 60000) {
   if (!supabase) return;
 
-  const { pullFromSupabase } = require('./pull_from_supabase');
-  const { syncAllToSupabase } = require('./sync_to_supabase');
+  const { processSyncQueue } = require('./syncQueue');
   
-  // Hydrate local SQLite from cloud immediately on startup
-  setTimeout(() => {
-    pullFromSupabase()
-      .then(() => syncAllToSupabase())
-      .catch(err => console.warn('[Supabase Sync Worker] Startup error:', err.message));
-  }, 2000);
-
-  // Periodic recurring background sync
+  // Periodic recurring background sync queue processing
   setInterval(() => {
-    syncAllToSupabase().catch(err => console.warn('[Supabase Sync Worker] Error:', err.message));
+    processSyncQueue().catch(err => console.warn('[Supabase Sync Worker] Error:', err.message));
   }, intervalMs);
 
-  console.log(`[Supabase] Live background auto-sync worker started (Interval: ${intervalMs / 1000}s)`);
+  console.log(`[Supabase] Live background sync queue worker started (Interval: ${intervalMs / 1000}s)`);
 }
 
 module.exports = {

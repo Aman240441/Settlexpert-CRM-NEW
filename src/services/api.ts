@@ -283,6 +283,7 @@ export const api = {
   getCRMClient: (id: string) => request<any>(`/crm/clients/${id}`),
   createCRMClient: (data: any) => request<any>('/crm/clients', { method: 'POST', body: JSON.stringify(data) }),
   updateCRMClient: (id: string, data: any) => request<any>(`/crm/clients/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  deleteCRMClient: (id: string) => request<any>(`/crm/clients/${id}`, { method: 'DELETE' }),
   addCRMLender: (clientId: string, data: any) => request<any>(`/crm/clients/${clientId}/lenders`, { method: 'POST', body: JSON.stringify(data) }),
   deleteCRMLender: (clientId: string, lenderId: string) => request<any>(`/crm/clients/${clientId}/lenders/${lenderId}`, { method: 'DELETE' }),
   getCRMAgreements: (params?: { search?: string; status?: string; date?: string; calendar_date?: string; from_date?: string; to_date?: string; page?: number; limit?: number }) => {

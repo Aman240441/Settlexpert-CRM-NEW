@@ -913,17 +913,13 @@ export const ManagerPaymentManagementView: React.FC<ManagerPaymentManagementView
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="text-[11px] font-bold text-slate-700 block mb-1">Agreement Duration *</label>
-              <select
+              <input
+                type="text"
                 value={generateForm.duration}
                 onChange={(e) => setGenerateForm({ ...generateForm, duration: e.target.value })}
+                placeholder="e.g., 6 Months"
                 className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-slate-900 font-medium focus:outline-none focus:border-[#15803d]"
-              >
-                <option value="1 Month">1 Month</option>
-                <option value="2 Months">2 Months</option>
-                <option value="4 Months">4 Months</option>
-                <option value="6 Months">6 Months (Standard)</option>
-                <option value="12 Months">12 Months</option>
-              </select>
+              />
             </div>
 
             <div>

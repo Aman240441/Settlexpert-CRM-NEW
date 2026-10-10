@@ -14,7 +14,8 @@ import {
   Mail,
   Phone,
   Building2,
-  Briefcase
+  Briefcase,
+  FileSpreadsheet
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { EmployeeDashboardView } from './EmployeeDashboardView';
@@ -22,6 +23,7 @@ import { EmployeeLeadsView } from './EmployeeLeadsView';
 import { EmployeeClientsView } from './EmployeeClientsView';
 import { EmployeeAgreementsView } from './EmployeeAgreementsView';
 import { NotificationBell } from '../common/NotificationBell';
+import { ClientOnboardingMainView } from '../crm/ClientOnboardingMainView';
 
 interface EmployeeWorkspaceProps {
   onSwitchToAdmin?: () => void;
@@ -29,7 +31,7 @@ interface EmployeeWorkspaceProps {
 
 export const EmployeeWorkspace: React.FC<EmployeeWorkspaceProps> = ({ onSwitchToAdmin }) => {
   const { user, logout } = useAuth();
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'leads' | 'clients' | 'agreements'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'leads' | 'clients' | 'agreements' | 'onboarding-form'>('dashboard');
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [leadsOpen, setLeadsOpen] = useState(true);
   const [clientsOpen, setClientsOpen] = useState(true);
@@ -81,26 +83,30 @@ export const EmployeeWorkspace: React.FC<EmployeeWorkspaceProps> = ({ onSwitchTo
   };
 
   return (
-    <div className="min-h-screen bg-[#f3f4f6] text-slate-800 flex font-sans antialiased">
-      {/* Sidebar - Matching Screenshot Light Sage Green Background */}
+    <div className="min-h-screen bg-[#F8FAFC] text-[#334155] flex font-sans antialiased">
+      {/* Sidebar */}
       <aside
-        className={`bg-[#cadbc8] border-r border-[#b5cbb3] transition-all duration-300 flex flex-col shrink-0 z-[500] ${sidebarOpen ? 'w-64' : 'w-20'
+        className={`bg-[#1E293B] border-r border-[#334155] transition-all duration-300 flex flex-col shrink-0 z-[500] ${sidebarOpen ? 'w-64' : 'w-20'
           }`}
       >
         {/* Top Logo */}
-        <div className="h-20 flex items-center px-5 border-b border-[#b5cbb3]/60">
+        <div className="h-20 flex items-center px-5 border-b border-[#334155]">
           {sidebarOpen ? (
-            <img
-              src="/logo.png"
-              alt="SettleXpert"
-              className="h-11 max-h-11 w-auto max-w-[210px] object-contain mix-blend-multiply"
-            />
+            <div className="bg-white px-3 py-1.5 rounded-xl shadow-xs inline-flex items-center">
+              <img
+                src="/logo.png"
+                alt="SettleXpert"
+                className="h-8 max-h-8 w-auto max-w-[190px] object-contain"
+              />
+            </div>
           ) : (
-            <img
-              src="/logo.png"
-              alt="SettleXpert"
-              className="h-10 w-10 object-contain mx-auto mix-blend-multiply"
-            />
+            <div className="bg-white p-1.5 rounded-xl shadow-xs mx-auto">
+              <img
+                src="/logo.png"
+                alt="SettleXpert"
+                className="h-7 w-7 object-contain"
+              />
+            </div>
           )}
         </div>
 
@@ -110,8 +116,8 @@ export const EmployeeWorkspace: React.FC<EmployeeWorkspaceProps> = ({ onSwitchTo
           <button
             onClick={() => setActiveTab('dashboard')}
             className={`w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl transition-all ${activeTab === 'dashboard'
-              ? 'bg-[#111827] text-white shadow-md'
-              : 'text-slate-700 hover:bg-[#b8ccb6] hover:text-slate-900'
+              ? 'bg-[#3B82F6] text-white shadow-sm'
+              : 'text-slate-300 hover:bg-[#334155] hover:text-white'
               }`}
           >
             <Gauge className="h-4 w-4 shrink-0" />
@@ -127,8 +133,8 @@ export const EmployeeWorkspace: React.FC<EmployeeWorkspaceProps> = ({ onSwitchTo
                 setActiveTab('leads');
               }}
               className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl transition-all ${activeTab === 'leads'
-                ? 'bg-[#111827] text-white shadow-md'
-                : 'text-slate-700 hover:bg-[#b8ccb6] hover:text-slate-900'
+                ? 'bg-[#334155] text-white'
+                : 'text-slate-300 hover:bg-[#334155] hover:text-white'
                 }`}
             >
               <div className="flex items-center space-x-3">
@@ -142,7 +148,7 @@ export const EmployeeWorkspace: React.FC<EmployeeWorkspaceProps> = ({ onSwitchTo
               )}
             </button>
             {sidebarOpen && leadsOpen && (
-              <div className="pl-9 pr-2 py-1 space-y-1">
+              <div className="pl-8 pr-1 py-1 space-y-1 border-l border-[#334155] ml-4">
                 <button
                   onClick={() => {
                     setLeadsFilter('all');
@@ -150,8 +156,8 @@ export const EmployeeWorkspace: React.FC<EmployeeWorkspaceProps> = ({ onSwitchTo
                     setActiveTab('leads');
                   }}
                   className={`w-full text-left py-1.5 px-3 rounded-lg text-[11px] font-medium transition-all ${activeTab === 'leads'
-                    ? 'bg-[#e2ede0] text-[#166534] font-bold'
-                    : 'text-slate-600 hover:text-slate-900'
+                    ? 'bg-[#3B82F6] text-white font-bold shadow-xs'
+                    : 'text-slate-400 hover:text-white hover:bg-[#334155]'
                     }`}
                 >
                   Lead List
@@ -168,8 +174,8 @@ export const EmployeeWorkspace: React.FC<EmployeeWorkspaceProps> = ({ onSwitchTo
                 setActiveTab('clients');
               }}
               className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl transition-all ${activeTab === 'clients'
-                ? 'bg-[#111827] text-white shadow-md'
-                : 'text-slate-700 hover:bg-[#b8ccb6] hover:text-slate-900'
+                ? 'bg-[#334155] text-white'
+                : 'text-slate-300 hover:bg-[#334155] hover:text-white'
                 }`}
             >
               <div className="flex items-center space-x-3">
@@ -183,13 +189,15 @@ export const EmployeeWorkspace: React.FC<EmployeeWorkspaceProps> = ({ onSwitchTo
               )}
             </button>
             {sidebarOpen && clientsOpen && (
-              <div className="pl-9 pr-2 py-1 space-y-1">
+              <div className="pl-8 pr-1 py-1 space-y-1 border-l border-[#334155] ml-4">
                 <button
                   onClick={() => {
                     setClientsFilter('');
                     setActiveTab('clients');
                   }}
-                  className={`w-full text-left py-1.5 px-3 rounded-lg text-[11px] font-medium transition-all ${activeTab === 'clients' ? 'bg-[#e2ede0] text-[#166534] font-bold' : 'text-slate-600 hover:text-slate-900'
+                  className={`w-full text-left py-1.5 px-3 rounded-lg text-[11px] font-medium transition-all ${activeTab === 'clients'
+                    ? 'bg-[#3B82F6] text-white font-bold shadow-xs'
+                    : 'text-slate-400 hover:text-white hover:bg-[#334155]'
                     }`}
                 >
                   Client List
@@ -206,8 +214,8 @@ export const EmployeeWorkspace: React.FC<EmployeeWorkspaceProps> = ({ onSwitchTo
                 setActiveTab('agreements');
               }}
               className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl transition-all ${activeTab === 'agreements'
-                ? 'bg-[#111827] text-white shadow-md'
-                : 'text-slate-700 hover:bg-[#b8ccb6] hover:text-slate-900'
+                ? 'bg-[#334155] text-white'
+                : 'text-slate-300 hover:bg-[#334155] hover:text-white'
                 }`}
             >
               <div className="flex items-center space-x-3">
@@ -221,13 +229,15 @@ export const EmployeeWorkspace: React.FC<EmployeeWorkspaceProps> = ({ onSwitchTo
               )}
             </button>
             {sidebarOpen && agreementsOpen && (
-              <div className="pl-9 pr-2 py-1 space-y-1">
+              <div className="pl-8 pr-1 py-1 space-y-1 border-l border-[#334155] ml-4">
                 <button
                   onClick={() => {
                     setAgreementPreselect(null);
                     setActiveTab('agreements');
                   }}
-                  className={`w-full text-left py-1.5 px-3 rounded-lg text-[11px] font-medium transition-all ${activeTab === 'agreements' ? 'bg-[#e2ede0] text-[#166534] font-bold' : 'text-slate-600 hover:text-slate-900'
+                  className={`w-full text-left py-1.5 px-3 rounded-lg text-[11px] font-medium transition-all ${activeTab === 'agreements'
+                    ? 'bg-[#3B82F6] text-white font-bold shadow-xs'
+                    : 'text-slate-400 hover:text-white hover:bg-[#334155]'
                     }`}
                 >
                   Agreement List
@@ -237,27 +247,27 @@ export const EmployeeWorkspace: React.FC<EmployeeWorkspaceProps> = ({ onSwitchTo
           </div>
         </nav>
 
-        {/* Sidebar Footer */}
+        {/* Footer */}
         {sidebarOpen && (
-          <div className="p-3 border-t border-[#b5cbb3]/60 text-center">
-            <span className="text-[10px] text-slate-600 font-medium">SettleXpert • Consultant</span>
+          <div className="p-3 border-t border-[#334155] text-center">
+            <span className="text-[10px] text-slate-400 font-medium">Settl Expert v1.0 • Employee CRM</span>
           </div>
         )}
       </aside>
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0 overflow-hidden bg-[#f9fafb]">
-        {/* Top Header Bar - Matching Screenshot */}
-        <header className="h-14 bg-[#cadbc8] border-b border-[#b5cbb3] px-4 flex items-center justify-between shrink-0">
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden bg-[#F8FAFC]">
+        {/* Top Header Bar */}
+        <header className="h-14 bg-white border-b border-[#E2E8F0] px-4 flex items-center justify-between shrink-0">
           {/* Left: Hamburger & Welcome Back */}
           <div className="flex items-center space-x-3">
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="p-1.5 rounded-lg hover:bg-[#b8ccb6] text-slate-700 transition-colors"
+              className="p-1.5 rounded-lg hover:bg-[#F8FAFC] text-slate-600 transition-colors"
             >
               <Menu className="h-5 w-5" />
             </button>
-            <span className="text-sm font-bold text-slate-800 tracking-tight">
+            <span className="text-sm font-bold text-[#1E293B] tracking-tight">
               Welcome Back!
             </span>
           </div>
@@ -271,16 +281,16 @@ export const EmployeeWorkspace: React.FC<EmployeeWorkspaceProps> = ({ onSwitchTo
             {user?.role === 'admin' && onSwitchToAdmin && (
               <button
                 onClick={onSwitchToAdmin}
-                className="px-3 py-1.5 rounded-lg bg-white/80 hover:bg-white text-indigo-700 border border-indigo-200 text-xs font-bold transition-all flex items-center space-x-1.5 shadow-sm"
+                className="px-3 py-1.5 rounded-xl bg-white hover:bg-[#F8FAFC] text-[#334155] hover:text-[#2563EB] border border-[#E2E8F0] text-xs font-semibold transition-all flex items-center space-x-1.5 shadow-xs cursor-pointer"
               >
-                <ArrowLeftRight className="h-3.5 w-3.5" />
+                <ArrowLeftRight className="h-3.5 w-3.5 text-[#3B82F6]" />
                 <span>Admin Master Control</span>
               </button>
             )}
 
             <button
               onClick={toggleFullscreen}
-              className="p-1.5 rounded-lg hover:bg-[#b8ccb6] text-slate-700 transition-colors hidden sm:block"
+              className="p-1.5 rounded-lg hover:bg-[#F8FAFC] text-slate-600 transition-colors hidden sm:block cursor-pointer"
               title="Toggle Fullscreen"
             >
               <Maximize2 className="h-4 w-4" />
@@ -291,54 +301,46 @@ export const EmployeeWorkspace: React.FC<EmployeeWorkspaceProps> = ({ onSwitchTo
               <button
                 type="button"
                 onClick={() => setShowProfileMenu(!showProfileMenu)}
-                className="flex items-center space-x-2.5 p-1 pl-1.5 rounded-xl hover:bg-[#b8ccb6] transition-colors cursor-pointer"
+                className="flex items-center space-x-2.5 p-1 pl-1.5 rounded-xl hover:bg-[#F8FAFC] transition-colors cursor-pointer"
                 aria-label="Employee profile menu"
                 aria-expanded={showProfileMenu}
               >
-                <div className="h-9 w-9 rounded-xl bg-amber-500 text-white font-black text-xs flex items-center justify-center shadow-xs overflow-hidden border border-amber-600/30">
+                <div className="h-8 w-8 rounded-xl bg-[#3B82F6] flex items-center justify-center text-white font-black text-xs shadow-xs overflow-hidden">
                   {user?.profile_image ? (
-                    <img src={user.profile_image} alt={user.name} className="h-full w-full object-cover" />
+                    <img src={user.profile_image} alt={user?.name} className="h-full w-full object-cover" />
                   ) : (
-                    <span>{user?.name ? user.name.charAt(0).toUpperCase() : 'E'}</span>
+                    <span>{user?.name?.charAt(0) || 'U'}</span>
                   )}
                 </div>
-                <div className="hidden md:flex flex-col text-left">
-                  <span className="text-xs font-bold text-slate-800 leading-tight truncate max-w-[130px]">
-                    {user?.name || 'Employee'}
-                  </span>
-                  <span className="text-[10px] text-amber-800 font-semibold leading-tight truncate max-w-[130px]">
-                    {user?.designation || 'Debt Settlement Consultant'}
-                  </span>
+                <div className="text-left hidden md:block">
+                  <div className="text-xs font-bold text-[#1E293B] truncate max-w-[120px]">
+                    {user?.name}
+                  </div>
+                  <div className="text-[10px] text-[#2563EB] font-bold">
+                    Employee CRM
+                  </div>
                 </div>
-                <ChevronDown className="h-3.5 w-3.5 text-slate-600" />
+                <ChevronDown className="h-3 w-3 text-slate-500" />
               </button>
 
               {/* Profile Dropdown Popup */}
               {showProfileMenu && (
                 <div className="absolute right-0 mt-2 w-80 bg-white rounded-2xl shadow-2xl border border-slate-200/90 py-0 z-[100] animate-in fade-in zoom-in-95 duration-100 overflow-hidden text-left">
                   {/* Header Banner with Profile Picture & Info */}
-                  <div className="p-4 bg-gradient-to-br from-amber-600 via-amber-700 to-orange-800 text-white relative">
+                  <div className="p-4 bg-[#1E293B] text-white relative">
                     <div className="flex items-center space-x-3.5">
-                      <div className="h-14 w-14 rounded-2xl bg-white/15 border-2 border-white/40 text-white flex items-center justify-center font-black text-xl shadow-lg overflow-hidden shrink-0">
+                      <div className="h-10 w-10 rounded-xl bg-white/10 flex items-center justify-center text-white font-black text-sm shadow-xs border border-white/20 overflow-hidden shrink-0">
                         {user?.profile_image ? (
-                          <img src={user.profile_image} alt={user.name} className="h-full w-full object-cover" />
+                          <img src={user.profile_image} alt={user?.name} className="h-full w-full object-cover" />
                         ) : (
-                          <span>{user?.name ? user.name.charAt(0).toUpperCase() : 'E'}</span>
+                          <span>{user?.name?.charAt(0) || 'U'}</span>
                         )}
                       </div>
                       <div className="min-w-0 flex-1">
-                        <h4 className="text-sm font-black text-white truncate leading-tight">{user?.name}</h4>
-                        <p className="text-[11px] text-amber-200 font-bold truncate mt-0.5">
-                          {user?.designation || 'Debt Settlement Consultant'}
-                        </p>
-                        <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
-                          <span className="px-2 py-0.5 rounded-md bg-amber-500/40 border border-amber-300/40 text-[10px] font-bold text-white tracking-wide font-mono">
-                            {user?.emp_or_mgr_id || 'ID: —'}
-                          </span>
-                          <span className="px-2 py-0.5 rounded-md bg-white/20 text-[10px] font-bold text-white uppercase tracking-wider">
-                            Employee
-                          </span>
-                        </div>
+                        <div className="font-bold text-sm truncate">{user?.name}</div>
+                        <span className="px-2 py-0.5 rounded-md bg-white/20 text-[10px] font-bold text-white uppercase tracking-wider">
+                          Employee
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -457,6 +459,9 @@ export const EmployeeWorkspace: React.FC<EmployeeWorkspaceProps> = ({ onSwitchTo
           )}
           {activeTab === 'agreements' && (
             <EmployeeAgreementsView preselectedClient={agreementPreselect} />
+          )}
+          {activeTab === 'onboarding-form' && (
+            <ClientOnboardingMainView userRole="employee" />
           )}
         </main>
       </div>

@@ -52,6 +52,7 @@ export const EmployeeLeadsView: React.FC<EmployeeLeadsViewProps> = ({
   const [statusCounts, setStatusCounts] = useState({
     all: 0,
     new: 0,
+    connected: 0,
     contacted: 0,
     interested: 0,
     follow_up: 0,
@@ -85,7 +86,9 @@ export const EmployeeLeadsView: React.FC<EmployeeLeadsViewProps> = ({
     credit_card_dues: '',
     personal_loan_dues: '',
     service_fee: '0',
-    status: 'new'
+    status: 'new',
+    address: '',
+    state: ''
   });
 
   // Follow-up Screen State
@@ -212,8 +215,10 @@ export const EmployeeLeadsView: React.FC<EmployeeLeadsViewProps> = ({
       consultation_timing: lead.consultation_timing || '10:00 AM - 12:00 PM',
       credit_card_dues: lead.credit_card_dues ? String(lead.credit_card_dues) : '',
       personal_loan_dues: lead.personal_loan_dues ? String(lead.personal_loan_dues) : '',
-      service_fee: lead.service_fee ? String(lead.service_fee) : '0',
-      status: lead.status || 'new'
+      service_fee: lead.service_fee?.toString() || '0',
+      status: lead.status || 'new',
+      address: lead.address || '',
+      state: lead.state || ''
     });
     setViewMode('edit_lead');
   };
@@ -222,20 +227,13 @@ export const EmployeeLeadsView: React.FC<EmployeeLeadsViewProps> = ({
   const handleSaveEditLead = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      // Map debt range to numeric if needed
-      let numericDebt = editFormData.total_debt;
-      if (editFormData.total_debt_range === 'Less Than ₹1,00,000') numericDebt = 90000;
-      else if (editFormData.total_debt_range === '₹1,00,000 - ₹5,00,000') numericDebt = 300000;
-      else if (editFormData.total_debt_range === '₹5,00,000 - ₹10,00,000') numericDebt = 750000;
-      else if (editFormData.total_debt_range === 'Above ₹10,000,000') numericDebt = 1200000;
-
-      const payload = {
+      const payload: any = {
         name: editFormData.name,
         phone: editFormData.phone,
         email: editFormData.email,
         city: editFormData.city,
-        total_debt: numericDebt,
-        monthly_income: parseFloat(editFormData.monthly_income as any) || 0,
+        total_debt: editFormData.total_debt,
+        monthly_income: editFormData.monthly_income,
         service_needed: editFormData.service_needed,
         paying_emis: editFormData.paying_emis,
         harassment_calls: editFormData.harassment_calls,
@@ -243,11 +241,22 @@ export const EmployeeLeadsView: React.FC<EmployeeLeadsViewProps> = ({
         employment_type: editFormData.employment_type,
         settlement_needed: editFormData.settlement_needed,
         consultation_timing: editFormData.consultation_timing,
-        credit_card_dues: parseFloat(editFormData.credit_card_dues as any) || 0,
-        personal_loan_dues: parseFloat(editFormData.personal_loan_dues as any) || 0,
-        service_fee: parseFloat(editFormData.service_fee as any) || 0,
-        status: editFormData.status
+        credit_card_dues: editFormData.credit_card_dues ? parseFloat(editFormData.credit_card_dues) : 0,
+        personal_loan_dues: editFormData.personal_loan_dues ? parseFloat(editFormData.personal_loan_dues) : 0,
+        service_fee: editFormData.service_fee ? parseFloat(editFormData.service_fee) : 0,
+        status: editFormData.status,
+        address: editFormData.address,
+        state: editFormData.state
       };
+
+      // If status is converted, we require Client Details and send finalize_conversion flag
+      if (editFormData.status === 'converted') {
+        if (!editFormData.name || !editFormData.phone || !editFormData.city || !editFormData.address || !editFormData.state) {
+          setFeedbackMsg({ type: 'error', text: 'Name, Phone, City, Address, and State are required to finalize conversion.' });
+          return;
+        }
+        payload.finalize_conversion = true;
+      }
 
       const res = await api.updateCRMLead(currentLead.id, payload);
       if (editFormData.status === 'converted') {
@@ -265,31 +274,7 @@ export const EmployeeLeadsView: React.FC<EmployeeLeadsViewProps> = ({
     }
   };
 
-  // Dedicated Convert Lead to Client Action
-  const handleConvertLead = async (lead: any) => {
-    if (lead.status === 'converted') {
-      if (onNavigateToClients) {
-        onNavigateToClients();
-      } else {
-        setFeedbackMsg({ type: 'success', text: `Lead ${lead.lead_number} is already converted to a Client. View it in the Clients list.` });
-      }
-      return;
-    }
-
-    try {
-      setLoading(true);
-      const res = await api.convertCRMLead(lead.id);
-      setFeedbackMsg({
-        type: 'success',
-        text: `🎉 Lead ${lead.lead_number} converted successfully to Client ${res.client_number || ''}! Transferred to Clients list.`
-      });
-      fetchLeads();
-    } catch (err: any) {
-      setFeedbackMsg({ type: 'error', text: err.message || 'Failed to convert lead' });
-    } finally {
-      setLoading(false);
-    }
-  };
+  // (Convert button has been removed. Conversion is handled entirely through Follow Up and Edit Lead)
 
   // Open Dedicated Follow-up Screen
   const handleOpenFollowUp = async (lead: any) => {
@@ -318,7 +303,7 @@ export const EmployeeLeadsView: React.FC<EmployeeLeadsViewProps> = ({
       if (followUpFormData.final_status === 'converted') {
         setFeedbackMsg({
           type: 'success',
-          text: `🎉 Follow-up saved & Lead ${selectedLeadForFollowUp.lead_number} converted to Client${res.client_number ? ` (${res.client_number})` : ''}! Transferred to Clients list.`
+          text: `🎉 Follow-up saved & Lead ${selectedLeadForFollowUp.lead_number} marked as Converted! Please open Edit Lead to finalize Conversion.`
         });
       } else {
         setFeedbackMsg({ type: 'success', text: `Follow-up recorded successfully for ${selectedLeadForFollowUp.lead_number}!` });
@@ -668,6 +653,7 @@ export const EmployeeLeadsView: React.FC<EmployeeLeadsViewProps> = ({
                 className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-slate-900 focus:outline-none focus:border-blue-600 font-bold"
               >
                 <option value="new">New</option>
+                <option value="connected">Connected</option>
                 <option value="contacted">Contacted</option>
                 <option value="interested">Interested</option>
                 <option value="follow_up">Follow Up</option>
@@ -677,6 +663,38 @@ export const EmployeeLeadsView: React.FC<EmployeeLeadsViewProps> = ({
             </div>
             <div />
           </div>
+
+          {/* Client Details Section - Appears only when status is converted */}
+          {editFormData.status === 'converted' && (
+            <div className="mt-6 pt-4 border-t border-gray-200">
+              <h3 className="text-sm font-bold text-emerald-800 mb-3 uppercase tracking-wide flex items-center">
+                <CheckCircle2 className="w-4 h-4 mr-2" />
+                Client Details (Required for Conversion)
+              </h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-slate-600 block mb-1 font-semibold">Address *</label>
+                  <input
+                    type="text"
+                    value={editFormData.address}
+                    onChange={(e) => setEditFormData({ ...editFormData, address: e.target.value })}
+                    className="w-full px-3 py-2 bg-white border border-emerald-300 rounded-lg text-slate-900 focus:outline-none focus:border-emerald-600 font-semibold"
+                    placeholder="Full Address"
+                  />
+                </div>
+                <div>
+                  <label className="text-slate-600 block mb-1 font-semibold">State *</label>
+                  <input
+                    type="text"
+                    value={editFormData.state}
+                    onChange={(e) => setEditFormData({ ...editFormData, state: e.target.value })}
+                    className="w-full px-3 py-2 bg-white border border-emerald-300 rounded-lg text-slate-900 focus:outline-none focus:border-emerald-600 font-semibold"
+                    placeholder="State"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Bottom Action Buttons: Blue Update Lead + Green Cancel */}
           <div className="flex items-center space-x-3 pt-4 border-t border-gray-100">
@@ -711,8 +729,8 @@ export const EmployeeLeadsView: React.FC<EmployeeLeadsViewProps> = ({
         {feedbackMsg && (
           <div
             className={`p-3 rounded-lg flex items-center justify-between text-xs font-semibold ${feedbackMsg.type === 'success'
-                ? 'bg-emerald-50 border border-emerald-300 text-emerald-800'
-                : 'bg-rose-50 border border-rose-300 text-rose-800'
+              ? 'bg-emerald-50 border border-emerald-300 text-emerald-800'
+              : 'bg-rose-50 border border-rose-300 text-rose-800'
               }`}
           >
             <span>{feedbackMsg.text}</span>
@@ -875,13 +893,14 @@ export const EmployeeLeadsView: React.FC<EmployeeLeadsViewProps> = ({
               </div>
 
               <div>
-                <label className="text-slate-600 block mb-1 font-semibold">Final Status *</label>
+                <label className="text-slate-500 block mb-1 text-xs font-semibold">Final Status *</label>
                 <select
                   value={followUpFormData.final_status}
                   onChange={(e) => setFollowUpFormData({ ...followUpFormData, final_status: e.target.value })}
-                  className="w-full px-2.5 py-2 bg-white border border-gray-300 rounded text-slate-900 text-xs focus:outline-none focus:border-blue-600 font-bold"
+                  className="w-full px-3 py-2 bg-white border border-gray-300 rounded-lg text-slate-900 focus:outline-none focus:border-emerald-600 font-bold text-xs"
                 >
                   <option value="new">New</option>
+                  <option value="connected">Connected</option>
                   <option value="contacted">Contacted</option>
                   <option value="interested">Interested</option>
                   <option value="follow_up">Follow Up</option>
@@ -945,7 +964,7 @@ export const EmployeeLeadsView: React.FC<EmployeeLeadsViewProps> = ({
                       <td className="py-2.5 px-3 text-slate-700">{h.call_status}</td>
                       <td className="py-2.5 px-3">
                         <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${h.interested_level === 'High' ? 'bg-emerald-100 text-emerald-800' :
-                            h.interested_level === 'Medium' ? 'bg-amber-100 text-amber-800' : 'bg-gray-100 text-slate-700'
+                          h.interested_level === 'Medium' ? 'bg-amber-100 text-amber-800' : 'bg-gray-100 text-slate-700'
                           }`}>
                           {h.interested_level}
                         </span>
@@ -988,8 +1007,8 @@ export const EmployeeLeadsView: React.FC<EmployeeLeadsViewProps> = ({
       {feedbackMsg && (
         <div
           className={`p-3 rounded-lg flex items-center justify-between text-xs font-semibold ${feedbackMsg.type === 'success'
-              ? 'bg-emerald-50 border border-emerald-300 text-emerald-800'
-              : 'bg-rose-50 border border-rose-300 text-rose-800'
+            ? 'bg-emerald-50 border border-emerald-300 text-emerald-800'
+            : 'bg-rose-50 border border-rose-300 text-rose-800'
             }`}
         >
           <span>{feedbackMsg.text}</span>
@@ -1053,8 +1072,8 @@ export const EmployeeLeadsView: React.FC<EmployeeLeadsViewProps> = ({
             setPage(1);
           }}
           className={`px-3 py-1 rounded text-xs font-semibold transition-all ${statusFilter === 'all'
-              ? 'bg-[#111827] text-white shadow-xs'
-              : 'bg-white hover:bg-gray-50 text-slate-700 border border-gray-200'
+            ? 'bg-[#111827] text-white shadow-xs'
+            : 'bg-white hover:bg-gray-50 text-slate-700 border border-gray-200'
             }`}
         >
           All ({statusCounts.all})
@@ -1065,11 +1084,23 @@ export const EmployeeLeadsView: React.FC<EmployeeLeadsViewProps> = ({
             setPage(1);
           }}
           className={`px-3 py-1 rounded text-xs font-semibold transition-all ${statusFilter === 'new'
-              ? 'bg-[#111827] text-white shadow-xs'
-              : 'bg-white hover:bg-gray-50 text-slate-700 border border-gray-200'
+            ? 'bg-[#111827] text-white shadow-xs'
+            : 'bg-white hover:bg-gray-50 text-slate-700 border border-gray-200'
             }`}
         >
           New ({statusCounts.new})
+        </button>
+        <button
+          onClick={() => {
+            setStatusFilter('connected');
+            setPage(1);
+          }}
+          className={`px-3 py-1 rounded text-xs font-semibold transition-all ${statusFilter === 'connected'
+            ? 'bg-[#111827] text-white shadow-xs'
+            : 'bg-white hover:bg-gray-50 text-slate-700 border border-gray-200'
+            }`}
+        >
+          Connected ({statusCounts.connected})
         </button>
         <button
           onClick={() => {
@@ -1077,8 +1108,8 @@ export const EmployeeLeadsView: React.FC<EmployeeLeadsViewProps> = ({
             setPage(1);
           }}
           className={`px-3 py-1 rounded text-xs font-semibold transition-all ${statusFilter === 'contacted'
-              ? 'bg-[#111827] text-white shadow-xs'
-              : 'bg-white hover:bg-gray-50 text-slate-700 border border-gray-200'
+            ? 'bg-[#111827] text-white shadow-xs'
+            : 'bg-white hover:bg-gray-50 text-slate-700 border border-gray-200'
             }`}
         >
           Contacted ({statusCounts.contacted})
@@ -1089,8 +1120,8 @@ export const EmployeeLeadsView: React.FC<EmployeeLeadsViewProps> = ({
             setPage(1);
           }}
           className={`px-3 py-1 rounded text-xs font-semibold transition-all ${statusFilter === 'interested'
-              ? 'bg-[#111827] text-white shadow-xs'
-              : 'bg-white hover:bg-gray-50 text-slate-700 border border-gray-200'
+            ? 'bg-[#111827] text-white shadow-xs'
+            : 'bg-white hover:bg-gray-50 text-slate-700 border border-gray-200'
             }`}
         >
           Interested ({statusCounts.interested})
@@ -1101,8 +1132,8 @@ export const EmployeeLeadsView: React.FC<EmployeeLeadsViewProps> = ({
             setPage(1);
           }}
           className={`px-3 py-1 rounded text-xs font-semibold transition-all ${statusFilter === 'follow_up'
-              ? 'bg-[#111827] text-white shadow-xs'
-              : 'bg-white hover:bg-gray-50 text-slate-700 border border-gray-200'
+            ? 'bg-[#111827] text-white shadow-xs'
+            : 'bg-white hover:bg-gray-50 text-slate-700 border border-gray-200'
             }`}
         >
           Follow up ({statusCounts.follow_up})
@@ -1113,8 +1144,8 @@ export const EmployeeLeadsView: React.FC<EmployeeLeadsViewProps> = ({
             setPage(1);
           }}
           className={`px-3 py-1 rounded text-xs font-semibold transition-all ${statusFilter === 'converted'
-              ? 'bg-[#111827] text-white shadow-xs'
-              : 'bg-white hover:bg-gray-50 text-slate-700 border border-gray-200'
+            ? 'bg-[#111827] text-white shadow-xs'
+            : 'bg-white hover:bg-gray-50 text-slate-700 border border-gray-200'
             }`}
         >
           Converted ({statusCounts.converted})
@@ -1125,8 +1156,8 @@ export const EmployeeLeadsView: React.FC<EmployeeLeadsViewProps> = ({
             setPage(1);
           }}
           className={`px-3 py-1 rounded text-xs font-semibold transition-all ${statusFilter === 'not_interested'
-              ? 'bg-[#111827] text-white shadow-xs'
-              : 'bg-white hover:bg-gray-50 text-slate-700 border border-gray-200'
+            ? 'bg-[#111827] text-white shadow-xs'
+            : 'bg-white hover:bg-gray-50 text-slate-700 border border-gray-200'
             }`}
         >
           Not Interested ({statusCounts.not_interested})
@@ -1251,10 +1282,10 @@ export const EmployeeLeadsView: React.FC<EmployeeLeadsViewProps> = ({
                     </td>
                     <td className="py-2.5 px-3 text-center">
                       <span className={`px-2.5 py-0.5 rounded text-[10px] font-bold capitalize ${l.status === 'new' ? 'bg-blue-100 text-blue-800' :
-                          l.status === 'contacted' ? 'bg-amber-100 text-amber-800' :
-                            l.status === 'interested' ? 'bg-emerald-100 text-emerald-800' :
-                              l.status === 'follow_up' ? 'bg-purple-100 text-purple-800' :
-                                l.status === 'converted' ? 'bg-teal-100 text-teal-800' : 'bg-gray-100 text-slate-700'
+                        l.status === 'contacted' ? 'bg-amber-100 text-amber-800' :
+                          l.status === 'interested' ? 'bg-emerald-100 text-emerald-800' :
+                            l.status === 'follow_up' ? 'bg-purple-100 text-purple-800' :
+                              l.status === 'converted' ? 'bg-teal-100 text-teal-800' : 'bg-gray-100 text-slate-700'
                         }`}>
                         {l.status}
                       </span>
@@ -1262,17 +1293,7 @@ export const EmployeeLeadsView: React.FC<EmployeeLeadsViewProps> = ({
                     {/* The Actions */}
                     <td className="py-2 px-3 text-center">
                       <div className="flex items-center justify-center space-x-1.5">
-                        {/* Button 1: Convert to Client */}
-                        {l.status !== 'converted' && (
-                          <button
-                            onClick={() => handleConvertLead(l)}
-                            title="Convert Lead to Client"
-                            className="h-7 px-2 rounded border text-[10px] font-bold transition-all flex items-center space-x-1 shadow-xs border-emerald-300 bg-emerald-50 text-emerald-700 hover:bg-emerald-600 hover:text-white"
-                          >
-                            <UserCheck className="h-3.5 w-3.5" />
-                            <span>Convert</span>
-                          </button>
-                        )}
+                        {/* The Convert Button was intentionally removed here to enforce the Follow-Up page workflow */}
 
                         {/* Button 2: Create Agreement */}
                         <button

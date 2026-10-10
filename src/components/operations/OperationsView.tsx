@@ -181,11 +181,13 @@ export const OperationsView: React.FC<OperationsViewProps> = ({ initialTab = 'ta
       </div>
 
       {/* Navigation Tabs */}
-      <div className="flex items-center space-x-2 border-b border-slate-200 pb-2 overflow-x-auto">
+      <div className="flex items-center space-x-2 border-b border-[#E2E8F0] pb-2 overflow-x-auto">
         <button
           onClick={() => setActiveTab('tasks')}
           className={`px-4 py-2 rounded-xl text-xs font-bold transition-colors flex items-center space-x-2 cursor-pointer ${
-            activeTab === 'tasks' ? 'bg-blue-600 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-100'
+            activeTab === 'tasks'
+              ? 'bg-[#EFF6FF] text-[#2563EB] border border-blue-200/80 shadow-xs'
+              : 'text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#1E293B]'
           }`}
         >
           <CheckCircle2 className="h-3.5 w-3.5" />
@@ -194,7 +196,9 @@ export const OperationsView: React.FC<OperationsViewProps> = ({ initialTab = 'ta
         <button
           onClick={() => setActiveTab('follow-ups')}
           className={`px-4 py-2 rounded-xl text-xs font-bold transition-colors flex items-center space-x-2 cursor-pointer ${
-            activeTab === 'follow-ups' ? 'bg-blue-600 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-100'
+            activeTab === 'follow-ups'
+              ? 'bg-[#EFF6FF] text-[#2563EB] border border-blue-200/80 shadow-xs'
+              : 'text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#1E293B]'
           }`}
         >
           <Calendar className="h-3.5 w-3.5" />
@@ -203,7 +207,9 @@ export const OperationsView: React.FC<OperationsViewProps> = ({ initialTab = 'ta
         <button
           onClick={() => setActiveTab('documents')}
           className={`px-4 py-2 rounded-xl text-xs font-bold transition-colors flex items-center space-x-2 cursor-pointer ${
-            activeTab === 'documents' ? 'bg-blue-600 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-100'
+            activeTab === 'documents'
+              ? 'bg-[#EFF6FF] text-[#2563EB] border border-blue-200/80 shadow-xs'
+              : 'text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#1E293B]'
           }`}
         >
           <FolderOpen className="h-3.5 w-3.5" />
@@ -212,7 +218,9 @@ export const OperationsView: React.FC<OperationsViewProps> = ({ initialTab = 'ta
         <button
           onClick={() => setActiveTab('escalations')}
           className={`px-4 py-2 rounded-xl text-xs font-bold transition-colors flex items-center space-x-2 cursor-pointer ${
-            activeTab === 'escalations' ? 'bg-rose-600 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-100'
+            activeTab === 'escalations'
+              ? 'bg-[#EFF6FF] text-[#2563EB] border border-blue-200/80 shadow-xs'
+              : 'text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#1E293B]'
           }`}
         >
           <AlertTriangle className="h-3.5 w-3.5" />

@@ -91,17 +91,17 @@ export const AgreementsView: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl font-black text-slate-900 tracking-tight flex items-center gap-2">
-            <FileSignature className="h-5 w-5 text-rose-600" />
+          <h2 className="text-xl font-black text-[#1E293B] tracking-tight flex items-center gap-2">
+            <FileSignature className="h-5 w-5 text-[#3B82F6]" />
             <span>Agreements & Retainer Contracts</span>
           </h2>
-          <p className="text-xs text-slate-500 mt-0.5">
+          <p className="text-xs text-[#64748B] mt-0.5">
             Binding settlement engagement contracts, fee terms, and protection tenures.
           </p>
         </div>
         <button
           onClick={() => setIsCreateOpen(true)}
-          className="inline-flex items-center space-x-2 px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold transition-all shadow-md shadow-blue-600/20 cursor-pointer"
+          className="inline-flex items-center space-x-2 px-4 py-2.5 rounded-xl bg-[#3B82F6] hover:bg-[#2563EB] text-white text-xs font-bold transition-all shadow-xs cursor-pointer"
         >
           <Plus className="h-4 w-4" />
           <span>New Agreement</span>
@@ -109,10 +109,10 @@ export const AgreementsView: React.FC = () => {
       </div>
 
       {/* Agreements Table */}
-      <div className="rounded-2xl bg-white border border-slate-200/80 overflow-hidden shadow-xs">
+      <div className="rounded-2xl bg-white border border-[#E2E8F0] overflow-hidden shadow-xs">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
-            <thead className="bg-slate-50 text-slate-500 uppercase text-[10px] font-bold tracking-wider border-b border-slate-200">
+            <thead className="bg-[#F8FAFC] text-[#334155] uppercase text-[10px] font-bold tracking-wider border-b border-[#E2E8F0]">
               <tr>
                 <th className="py-3.5 px-4">Agreement Ref</th>
                 <th className="py-3.5 px-4">Client Name</th>
@@ -122,35 +122,35 @@ export const AgreementsView: React.FC = () => {
                 <th className="py-3.5 px-4">Status</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 text-slate-700">
+            <tbody className="divide-y divide-[#E2E8F0] text-[#475569]">
               {loading ? (
                 <tr>
-                  <td colSpan={6} className="py-8 text-center text-slate-400 font-medium">
+                  <td colSpan={6} className="py-8 text-center text-[#64748B] font-medium">
                     Loading agreements...
                   </td>
                 </tr>
               ) : agreements.length > 0 ? (
                 agreements.map((a) => (
-                  <tr key={a.id} className="hover:bg-slate-50/80 transition-colors">
+                  <tr key={a.id} className="hover:bg-[#F8FAFC] transition-colors">
                     <td className="py-3.5 px-4">
-                      <span className="font-mono font-bold text-slate-900 block">{a.agreement_number}</span>
-                      <span className="text-[10px] text-slate-400">
+                      <span className="font-mono font-bold text-[#1E293B] block">{a.agreement_number}</span>
+                      <span className="text-[10px] text-[#64748B]">
                         {new Date(a.created_at).toLocaleDateString()}
                       </span>
                     </td>
                     <td className="py-3.5 px-4">
-                      <span className="font-bold text-slate-900 block">{a.client_name}</span>
-                      <span className="text-[11px] font-mono text-slate-400 font-bold">{a.client_number}</span>
+                      <span className="font-bold text-[#1E293B] block">{a.client_name}</span>
+                      <span className="text-[11px] font-mono text-[#64748B] font-bold">{a.client_number}</span>
                     </td>
-                    <td className="py-3.5 px-4 text-slate-700">
-                      <span className="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 text-[11px] font-semibold">
+                    <td className="py-3.5 px-4 text-[#334155]">
+                      <span className="px-2.5 py-0.5 rounded-full bg-[#F1F5F9] text-[#334155] text-[11px] font-semibold">
                         {a.fee_plan_name || 'Custom Plan'} ({a.fee_plan_duration || 'Custom'})
                       </span>
                     </td>
-                    <td className="py-3.5 px-4 font-black text-rose-600 text-sm">
+                    <td className="py-3.5 px-4 font-mono font-bold text-[#1E293B] text-sm">
                       {formatCurrency(a.total_fee)}
                     </td>
-                    <td className="py-3.5 px-4 text-slate-500 text-[11px]">
+                    <td className="py-3.5 px-4 text-[#64748B] text-[11px]">
                       {a.start_date || 'Immediate'} → {a.end_date || 'Expiry by tenure'}
                     </td>
                     <td className="py-3.5 px-4">
@@ -160,7 +160,7 @@ export const AgreementsView: React.FC = () => {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={6} className="py-8 text-center text-slate-400 font-medium">
+                  <td colSpan={6} className="py-8 text-center text-[#64748B] font-medium">
                     No agreements on file. Click "New Agreement" to draft one.
                   </td>
                 </tr>
@@ -180,12 +180,12 @@ export const AgreementsView: React.FC = () => {
       >
         <form onSubmit={handleCreateSubmit} className="space-y-4">
           <div>
-            <label className="text-xs font-semibold text-slate-300 block mb-1">Select Client *</label>
+            <label className="text-xs font-semibold text-[#334155] block mb-1">Select Client *</label>
             <select
               required
               value={formData.client_id}
               onChange={(e) => setFormData({ ...formData, client_id: e.target.value })}
-              className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-blue-500"
+              className="w-full px-3 py-2 bg-white border border-[#E2E8F0] rounded-xl text-xs text-[#334155] focus:outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6]/20"
             >
               {clients.map((c) => (
                 <option key={c.id} value={c.id}>
@@ -195,7 +195,7 @@ export const AgreementsView: React.FC = () => {
             </select>
           </div>
           <div>
-            <label className="text-xs font-semibold text-slate-300 block mb-1">Select Fee Plan *</label>
+            <label className="text-xs font-semibold text-[#334155] block mb-1">Select Fee Plan *</label>
             <select
               required
               value={formData.fee_plan_id}
@@ -207,7 +207,7 @@ export const AgreementsView: React.FC = () => {
                   total_fee: plan ? plan.default_fee : formData.total_fee,
                 });
               }}
-              className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-blue-500"
+              className="w-full px-3 py-2 bg-white border border-[#E2E8F0] rounded-xl text-xs text-[#334155] focus:outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6]/20"
             >
               {feePlans.map((p) => (
                 <option key={p.id} value={p.id}>
@@ -217,33 +217,33 @@ export const AgreementsView: React.FC = () => {
             </select>
           </div>
           <div>
-            <label className="text-xs font-semibold text-slate-300 block mb-1">Agreed Total Fee (₹) *</label>
+            <label className="text-xs font-semibold text-[#334155] block mb-1">Agreed Total Fee (₹) *</label>
             <input
               type="number"
               required
               min={1}
               value={formData.total_fee}
               onChange={(e) => setFormData({ ...formData, total_fee: parseFloat(e.target.value) || 0 })}
-              className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-blue-500"
+              className="w-full px-3 py-2 bg-white border border-[#E2E8F0] rounded-xl text-xs text-[#334155] focus:outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6]/20"
             />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-xs font-semibold text-slate-300 block mb-1">Start Date</label>
+              <label className="text-xs font-semibold text-[#334155] block mb-1">Start Date</label>
               <input
                 type="date"
                 value={formData.start_date}
                 onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
-                className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-blue-500"
+                className="w-full px-3 py-2 bg-white border border-[#E2E8F0] rounded-xl text-xs text-[#334155] focus:outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6]/20"
               />
             </div>
             <div>
-              <label className="text-xs font-semibold text-slate-300 block mb-1">End Date</label>
+              <label className="text-xs font-semibold text-[#334155] block mb-1">End Date</label>
               <input
                 type="date"
                 value={formData.end_date}
                 onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
-                className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-blue-500"
+                className="w-full px-3 py-2 bg-white border border-[#E2E8F0] rounded-xl text-xs text-[#334155] focus:outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6]/20"
               />
             </div>
           </div>
@@ -251,13 +251,13 @@ export const AgreementsView: React.FC = () => {
             <button
               type="button"
               onClick={() => setIsCreateOpen(false)}
-              className="px-4 py-2 rounded-xl text-xs text-slate-400 hover:text-white"
+              className="px-4 py-2 rounded-xl text-xs bg-white border border-[#E2E8F0] text-[#334155] hover:bg-[#F8FAFC] transition-colors font-medium"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold shadow-lg shadow-blue-600/30"
+              className="px-5 py-2.5 rounded-xl bg-[#3B82F6] hover:bg-[#2563EB] text-white text-xs font-bold shadow-xs transition-colors"
             >
               Issue Agreement
             </button>

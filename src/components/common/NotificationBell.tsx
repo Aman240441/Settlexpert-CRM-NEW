@@ -232,17 +232,17 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({ onViewClient
       <button
         id="notification-bell-btn"
         onClick={() => setIsOpen(!isOpen)}
-        className={`relative p-2 rounded-xl transition-all duration-200 ${
-          isOpen ? 'bg-[#111827] text-white shadow-lg'
-          : activeAlerts > 0 ? 'bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 shadow-sm'
-          : 'hover:bg-[#b8ccb6] text-slate-700'
+        className={`relative p-2 rounded-xl transition-all duration-200 cursor-pointer ${
+          isOpen ? 'bg-[#1E293B] text-white shadow-sm'
+          : activeAlerts > 0 ? 'bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 shadow-xs'
+          : 'hover:bg-[#F8FAFC] text-[#334155]'
         }`}
         title={`${unreadBadge} unread notifications`}
         aria-label="Payment Notifications"
       >
         <Bell className="h-5 w-5" />
         {unreadBadge > 0 && (
-          <span className="absolute -top-1 -right-1 bg-rose-600 text-white text-[9px] font-black rounded-full flex items-center justify-center shadow-sm"
+          <span className="absolute -top-1 -right-1 bg-[#EF4444] text-white text-[9px] font-black rounded-full flex items-center justify-center shadow-xs"
             style={{ minWidth: '18px', height: '18px', padding: '0 3px', lineHeight: '18px' }}>
             {unreadBadge > 99 ? '99+' : unreadBadge}
           </span>
@@ -250,14 +250,14 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({ onViewClient
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2.5 bg-white rounded-2xl shadow-2xl border border-slate-200 z-[999] overflow-hidden flex flex-col"
+        <div className="absolute right-0 mt-2.5 bg-white rounded-2xl shadow-xl border border-[#E2E8F0] z-[999] overflow-hidden flex flex-col"
           style={{ width: '400px', maxHeight: '85vh' }}>
 
           {/* Header */}
-          <div className="px-4 pt-4 pb-3 border-b border-slate-100" style={{ background: 'linear-gradient(135deg,#1e293b,#0f172a)' }}>
+          <div className="px-4 pt-4 pb-3 border-b border-slate-700 bg-[#1E293B]">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center space-x-2">
-                <Bell className="h-4 w-4 text-amber-400" />
+                <Bell className="h-4 w-4 text-[#F59E0B]" />
                 <span className="font-bold text-white text-sm">Payment Notifications</span>
               </div>
               <div className="flex items-center space-x-1.5">

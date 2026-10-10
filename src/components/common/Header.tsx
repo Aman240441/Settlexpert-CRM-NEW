@@ -53,28 +53,28 @@ export const Header: React.FC<HeaderProps> = ({ currentSection, onSearchChange, 
   ];
 
   return (
-    <header className="sticky top-0 z-10 flex h-16 w-full items-center justify-between border-b border-[#b5cbb3] bg-[#cadbc8] px-6 font-sans">
+    <header className="sticky top-0 z-10 flex h-16 w-full items-center justify-between border-b border-[#E2E8F0] bg-white px-6 font-sans">
       {/* Left: Breadcrumb / Active Section */}
       <div className="flex items-center space-x-3">
         <div className="flex items-center space-x-2">
-          <div className="h-2 w-2 rounded-full bg-[#16a34a] animate-pulse" />
-          <span className="text-xs font-bold uppercase tracking-wider text-[#166534]">Welcome Back!</span>
+          <div className="h-2 w-2 rounded-full bg-[#22C55E] animate-pulse" />
+          <span className="text-xs font-bold uppercase tracking-wider text-[#2563EB]">Welcome Back!</span>
         </div>
-        <span className="text-slate-400 font-bold">/</span>
-        <h1 className="text-sm font-bold text-slate-800 tracking-tight capitalize">
+        <span className="text-slate-300 font-bold">/</span>
+        <h1 className="text-sm font-bold text-[#1E293B] tracking-tight capitalize">
           {currentSection.replace(/-/g, ' ')}
         </h1>
       </div>
 
       {/* Middle: Quick Search */}
       <div className="hidden md:flex items-center w-80 relative">
-        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-500" />
+        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[#94A3B8]" />
         <input
           type="text"
           placeholder="Global search managers, employees, cases..."
           value={searchVal}
           onChange={handleSearch}
-          className="w-full pl-9 pr-4 py-1.5 bg-white/90 border border-[#a8c0a6] rounded-xl text-xs text-slate-800 placeholder-slate-500 focus:outline-none focus:border-[#15803d] focus:bg-white transition-all shadow-2xs"
+          className="w-full pl-9 pr-4 py-1.5 bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl text-xs text-[#334155] placeholder-[#94A3B8] focus:outline-none focus:border-[#3B82F6] focus:bg-white focus:ring-2 focus:ring-blue-100 transition-all shadow-xs"
         />
       </div>
 
@@ -86,7 +86,7 @@ export const Header: React.FC<HeaderProps> = ({ currentSection, onSearchChange, 
         <button
           type="button"
           onClick={toggleFullscreen}
-          className="p-1.5 rounded-lg hover:bg-[#b8ccb6] text-slate-700 transition-colors hidden sm:block cursor-pointer"
+          className="p-1.5 rounded-lg hover:bg-[#F8FAFC] text-slate-600 transition-colors hidden sm:block cursor-pointer"
           title="Toggle Fullscreen"
           aria-label="Toggle Fullscreen"
         >
@@ -104,11 +104,11 @@ export const Header: React.FC<HeaderProps> = ({ currentSection, onSearchChange, 
               setShowProfileMenu(!showProfileMenu);
               setShowNotifications(false);
             }}
-            className="flex items-center space-x-2.5 p-1 pl-1.5 rounded-xl hover:bg-[#b8ccb6] transition-colors cursor-pointer"
+            className="flex items-center space-x-2.5 p-1 pl-1.5 rounded-xl hover:bg-[#F8FAFC] transition-colors cursor-pointer"
             aria-label="User profile menu"
             aria-expanded={showProfileMenu}
           >
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#15803d] text-xs font-black text-white shadow-xs overflow-hidden border border-emerald-600/30">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#3B82F6] text-xs font-black text-white shadow-xs overflow-hidden border border-blue-600/30">
               {user?.profile_image ? (
                 <img src={user.profile_image} alt={user.name} className="h-full w-full object-cover" />
               ) : (
@@ -116,18 +116,18 @@ export const Header: React.FC<HeaderProps> = ({ currentSection, onSearchChange, 
               )}
             </div>
             <div className="hidden text-left lg:block">
-              <span className="text-xs font-bold text-slate-900 block leading-tight truncate max-w-[130px]">{user?.name}</span>
-              <span className="text-[10px] text-[#166534] font-bold block leading-tight">Super Administrator</span>
+              <span className="text-xs font-bold text-[#1E293B] block leading-tight truncate max-w-[130px]">{user?.name}</span>
+              <span className="text-[10px] text-[#2563EB] font-bold block leading-tight">Super Administrator</span>
             </div>
-            <ChevronDown className="h-3.5 w-3.5 text-slate-600" />
+            <ChevronDown className="h-3.5 w-3.5 text-slate-500" />
           </button>
 
           {showProfileMenu && (
-            <div className="absolute right-0 mt-2 w-72 rounded-2xl bg-white border border-slate-200/90 shadow-2xl z-[100] animate-fade-in text-slate-800 text-xs overflow-hidden text-left">
+            <div className="absolute right-0 mt-2 w-72 rounded-2xl bg-white border border-[#E2E8F0] shadow-xl z-[100] animate-fade-in text-[#334155] text-xs overflow-hidden text-left">
               {/* Header Banner */}
-              <div className="p-4 bg-gradient-to-br from-emerald-800 via-[#15803d] to-teal-800 text-white">
+              <div className="p-4 bg-[#1E293B] text-white">
                 <div className="flex items-center space-x-3">
-                  <div className="h-12 w-12 rounded-xl bg-white/15 border-2 border-white/40 text-white flex items-center justify-center font-black text-lg shadow-md overflow-hidden shrink-0">
+                  <div className="h-12 w-12 rounded-xl bg-white/10 border border-white/20 text-white flex items-center justify-center font-black text-lg shadow-sm overflow-hidden shrink-0">
                     {user?.profile_image ? (
                       <img src={user.profile_image} alt={user.name} className="h-full w-full object-cover" />
                     ) : (
@@ -136,8 +136,8 @@ export const Header: React.FC<HeaderProps> = ({ currentSection, onSearchChange, 
                   </div>
                   <div className="min-w-0 flex-1">
                     <h4 className="text-sm font-black text-white truncate leading-tight">{user?.name}</h4>
-                    <p className="text-[11px] text-emerald-200 font-bold truncate mt-0.5">Super Administrator</p>
-                    <span className="inline-block mt-1 px-2 py-0.2 rounded-md bg-emerald-500/40 border border-emerald-300/40 text-[9px] font-bold text-white uppercase tracking-wider">
+                    <p className="text-[11px] text-blue-300 font-bold truncate mt-0.5">Super Administrator</p>
+                    <span className="inline-block mt-1 px-2 py-0.5 rounded-md bg-blue-600/30 border border-blue-400/40 text-[9px] font-bold text-blue-200 uppercase tracking-wider">
                       Master Control
                     </span>
                   </div>
@@ -145,22 +145,22 @@ export const Header: React.FC<HeaderProps> = ({ currentSection, onSearchChange, 
               </div>
 
               {/* Profile Details List */}
-              <div className="p-3 space-y-2 text-[11px] text-slate-700 bg-slate-50/60 border-b border-slate-100">
+              <div className="p-3 space-y-2 text-[11px] text-[#334155] bg-[#F8FAFC] border-b border-[#E2E8F0]">
                 <div className="flex items-center justify-between">
-                  <span className="text-slate-500 flex items-center gap-1.5 font-medium">
-                    <Calendar className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
+                  <span className="text-[#64748B] flex items-center gap-1.5 font-medium">
+                    <Calendar className="h-3.5 w-3.5 text-[#3B82F6] shrink-0" />
                     <span>Joining Date</span>
                   </span>
-                  <span className="font-bold text-slate-800 font-mono">
+                  <span className="font-bold text-[#1E293B] font-mono">
                     {user?.joining_date ? new Date(user.joining_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : 'Permanent'}
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-slate-500 flex items-center gap-1.5 font-medium">
-                    <Mail className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
+                  <span className="text-[#64748B] flex items-center gap-1.5 font-medium">
+                    <Mail className="h-3.5 w-3.5 text-[#3B82F6] shrink-0" />
                     <span>Email</span>
                   </span>
-                  <span className="font-medium text-slate-800 truncate max-w-[150px]" title={user?.email}>
+                  <span className="font-medium text-[#1E293B] truncate max-w-[150px]" title={user?.email}>
                     {user?.email}
                   </span>
                 </div>

@@ -61,27 +61,27 @@ export const Drawer: React.FC<DrawerProps> = ({
 
       <div className="fixed inset-y-0 right-0 flex max-w-full pl-6 sm:pl-10 z-[1000]">
         <div
-          className={`w-screen ${widthMap[width]} transform bg-slate-900 border-l border-slate-800 shadow-2xl flex flex-col h-full`}
+          className={`w-screen ${widthMap[width]} transform bg-white border-l border-[#E2E8F0] shadow-2xl flex flex-col h-full`}
           onClick={(e) => e.stopPropagation()}
         >
           {/* Drawer Header */}
-          <div className="sticky top-0 z-10 flex items-center justify-between border-b border-slate-800 px-6 py-5 bg-slate-900/95 backdrop-blur-xs shrink-0">
+          <div className="sticky top-0 z-10 flex items-center justify-between border-b border-[#E2E8F0] px-6 py-5 bg-[#F8FAFC] shrink-0">
             <div>
-              <h2 className="text-xl font-bold text-white tracking-tight">{title}</h2>
-              {subtitle && <p className="text-xs text-slate-400 mt-1">{subtitle}</p>}
+              <h2 className="text-xl font-bold text-[#1E293B] tracking-tight">{title}</h2>
+              {subtitle && <p className="text-xs text-[#64748B] mt-1">{subtitle}</p>}
             </div>
             <button
               type="button"
               onClick={onClose}
               aria-label="Close drawer"
-              className="rounded-lg p-2 text-slate-400 hover:bg-slate-800 hover:text-white transition-colors cursor-pointer"
+              className="rounded-lg p-2 text-[#64748B] hover:bg-[#E2E8F0]/60 hover:text-[#1E293B] transition-colors cursor-pointer"
             >
               <X className="h-5 w-5" />
             </button>
           </div>
 
           {/* Drawer Content */}
-          <div className="flex-1 overflow-y-auto p-6 space-y-6 text-slate-200">{children}</div>
+          <div className="flex-1 overflow-y-auto p-6 space-y-6 text-[#334155]">{children}</div>
         </div>
       </div>
     </div>

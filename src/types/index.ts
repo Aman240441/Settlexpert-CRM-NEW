@@ -194,8 +194,16 @@ export interface Client {
   name: string;
   email?: string;
   phone: string;
+  city?: string;
   total_debt: number;
   settlement_target: number;
+  sx_services_fee?: number;
+  fees_date?: string;
+  fees_status?: string;
+  pending_amount?: number;
+  total_received?: number;
+  this_month_received?: number;
+  case_status?: string;
   fee_plan_id?: string;
   fee_plan_name?: string;
   status: string;

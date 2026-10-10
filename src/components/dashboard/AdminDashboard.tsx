@@ -67,43 +67,46 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) =>
   }
 
   return (
-    <div className="space-y-6 font-sans text-slate-800 pb-16">
+    <div className="space-y-6 font-sans text-[#334155] pb-16">
       {/* Top Banner */}
-      <div className="rounded-2xl bg-gradient-to-r from-[#1e3a8a] via-[#1e40af] to-[#2563eb] text-white p-6 shadow-sm border border-blue-900/20 flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="rounded-xl bg-white text-[#1E293B] p-6 shadow-xs border border-[#E2E8F0] flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center space-x-2">
-            <span className="px-2.5 py-0.5 rounded-full bg-white/20 text-white text-[11px] font-bold uppercase tracking-wider">
-              Step 1 • Master Control
+            <span className="px-2.5 py-0.5 rounded-full bg-blue-50 text-[#2563EB] text-[11px] font-bold uppercase tracking-wider border border-blue-100">
+              Master Control Center
             </span>
-            <span className="text-xs text-blue-200 font-medium">• Real-time Sync Active</span>
+            <span className="text-xs text-[#22C55E] font-medium flex items-center gap-1.5">
+              <span className="h-2 w-2 rounded-full bg-[#22C55E] animate-pulse"></span>
+              Real-time Sync Active
+            </span>
           </div>
-          <h2 className="text-2xl font-black text-white tracking-tight mt-1.5">
+          <h2 className="text-2xl font-bold text-[#1E293B] tracking-tight mt-1.5">
             Executive Admin Control Center
           </h2>
-          <p className="text-xs text-blue-100 mt-1 max-w-2xl">
+          <p className="text-xs text-[#64748B] mt-1 max-w-2xl">
             Governing organization hierarchies, managers, advocates, fee plans, agreements, and live audit trails across Settl Expert.
           </p>
         </div>
         <div className="flex items-center space-x-2.5 flex-wrap">
           <button
             onClick={() => onNavigate('staff-directory')}
-            className="px-4 py-2.5 rounded-xl bg-white hover:bg-blue-50 text-blue-900 text-xs font-bold transition-all shadow-sm flex items-center space-x-2 cursor-pointer"
+            className="px-4 py-2.5 rounded-xl bg-[#3B82F6] hover:bg-[#2563EB] text-white text-xs font-bold transition-all shadow-xs flex items-center space-x-2 cursor-pointer"
           >
-            <Users className="h-4 w-4 text-blue-600" />
+            <Users className="h-4 w-4 text-white" />
             <span>Staff Directory & KYC</span>
           </button>
           <button
             onClick={() => onNavigate('managers')}
-            className="px-4 py-2.5 rounded-xl bg-white/15 hover:bg-white/25 text-white text-xs font-bold transition-all border border-white/20 flex items-center space-x-2 cursor-pointer"
+            className="px-4 py-2.5 rounded-xl bg-white hover:bg-[#F8FAFC] text-[#334155] text-xs font-semibold transition-all border border-[#E2E8F0] flex items-center space-x-2 cursor-pointer"
           >
-            <UserCheck className="h-4 w-4 text-white" />
+            <UserCheck className="h-4 w-4 text-[#64748B]" />
             <span>Managers</span>
           </button>
           <button
             onClick={() => onNavigate('advocates')}
-            className="px-4 py-2.5 rounded-xl bg-white/15 hover:bg-white/25 text-white text-xs font-bold transition-all border border-white/20 flex items-center space-x-2 cursor-pointer"
+            className="px-4 py-2.5 rounded-xl bg-white hover:bg-[#F8FAFC] text-[#334155] text-xs font-semibold transition-all border border-[#E2E8F0] flex items-center space-x-2 cursor-pointer"
           >
-            <Scale className="h-4 w-4 text-white" />
+            <Scale className="h-4 w-4 text-[#64748B]" />
             <span>Advocates</span>
           </button>
         </div>
@@ -123,7 +126,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) =>
           title="Employees"
           value={stats?.counts.totalEmployees || 0}
           icon={Users}
-          color="indigo"
+          color="blue"
           subtitle="Active workforce"
           onClick={() => onNavigate('employees')}
         />
@@ -131,7 +134,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) =>
           title="Advocates"
           value={stats?.counts.totalAdvocates || 0}
           icon={Scale}
-          color="purple"
+          color="blue"
           subtitle="Legal counsels"
           onClick={() => onNavigate('advocates')}
         />
@@ -155,7 +158,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) =>
           title="Agreements"
           value={stats?.counts.totalAgreements || 0}
           icon={FileSignature}
-          color="rose"
+          color="blue"
           subtitle="Active contracts"
           onClick={() => onNavigate('agreements')}
         />

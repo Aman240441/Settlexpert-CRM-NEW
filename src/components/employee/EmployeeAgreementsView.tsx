@@ -780,19 +780,13 @@ Date: ${executionDate}`;
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div>
                 <label className="text-slate-600 block mb-1 font-medium text-[11px]">Agreement Duration</label>
-                <select
+                <input
+                  type="text"
                   value={formData.agreement_duration}
                   onChange={(e) => handleDurationChange(e.target.value)}
+                  placeholder="e.g., 6 Months"
                   className="w-full px-3 py-1.5 bg-white border border-gray-300 rounded text-slate-900 text-xs focus:outline-none focus:border-blue-600 font-medium"
-                >
-                  <option value="1 Month">1 Month</option>
-                  <option value="2 Months">2 Months</option>
-                  <option value="4 Months">4 Months</option>
-                  <option value="6 Months">6 Months</option>
-                  <option value="12 Months">12 Months</option>
-                  <option value="Lifetime">Lifetime</option>
-                  <option value="Custom">Custom</option>
-                </select>
+                />
               </div>
 
               <div>

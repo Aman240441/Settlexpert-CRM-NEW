@@ -576,7 +576,7 @@ export const EmployeeDashboardView: React.FC<EmployeeDashboardViewProps> = ({ on
                 <th className="py-2.5 px-3">Phone</th>
                 <th className="py-2.5 px-3">City</th>
                 <th className="py-2.5 px-3 text-right">Total Outstanding</th>
-                <th className="py-2.5 px-3 text-right whitespace-nowrap">Monthly SX Fee</th>
+                <th className="py-2.5 px-3 text-right whitespace-nowrap">SX Services Fee</th>
                 <th className="py-2.5 px-3">Fees Date</th>
                 <th className="py-2.5 px-3 text-center">Fees Status</th>
                 <th className="py-2.5 px-3 text-right">Pending Amount</th>
@@ -671,7 +671,7 @@ export const EmployeeDashboardView: React.FC<EmployeeDashboardViewProps> = ({ on
 
             <div className="grid grid-cols-3 gap-3 text-center">
               <div className="p-3 bg-blue-50/60 rounded-lg border border-blue-100">
-                <span className="text-blue-700 text-[10px] uppercase font-bold block">Monthly SX Fee</span>
+                <span className="text-blue-700 text-[10px] uppercase font-bold block">SX Services Fee</span>
                 <span className="text-sm font-black text-blue-800 mt-0.5 block">{formatCurrency(selectedClient.monthly_fee || 8000)} / mo</span>
                 <span className="text-[10px] text-blue-600 block mt-0.5">Total: {formatCurrency(selectedClient.total_agreement_fee || ((selectedClient.monthly_fee || 8000) * 6))}</span>
               </div>

@@ -68,30 +68,30 @@ export const Modal: React.FC<ModalProps> = ({
 
       {/* Modal Dialog Card centered in viewport */}
       <div
-        className={`relative transform overflow-hidden rounded-2xl bg-white border border-gray-200 text-left shadow-2xl transition-all w-full ${maxWidthMap[maxWidth]} max-h-[90vh] flex flex-col ${containerZIndex} my-auto`}
+        className={`relative transform overflow-hidden rounded-2xl bg-white border border-[#E2E8F0] text-left shadow-xl transition-all w-full ${maxWidthMap[maxWidth]} max-h-[90vh] flex flex-col ${containerZIndex} my-auto`}
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
         aria-labelledby="modal-headline"
       >
         {/* Header */}
-        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-gray-100 px-6 py-4 bg-gray-50/95 backdrop-blur-xs shrink-0">
+        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-[#E2E8F0] px-6 py-4 bg-[#F8FAFC] shrink-0">
           <div>
-            <h3 id="modal-headline" className="text-base font-bold text-slate-900 tracking-tight">{title}</h3>
-            {subtitle && <p className="text-xs text-slate-500 mt-0.5">{subtitle}</p>}
+            <h3 id="modal-headline" className="text-base font-bold text-[#1E293B] tracking-tight">{title}</h3>
+            {subtitle && <p className="text-xs text-[#64748B] mt-0.5">{subtitle}</p>}
           </div>
           <button
             type="button"
             onClick={onClose}
             aria-label="Close dialog"
-            className="rounded-lg p-1.5 text-slate-400 hover:bg-gray-200 hover:text-slate-700 transition-colors cursor-pointer"
+            className="rounded-lg p-1.5 text-[#64748B] hover:bg-slate-200 hover:text-[#1E293B] transition-colors cursor-pointer"
           >
             <X className="h-5 w-5" />
           </button>
         </div>
 
         {/* Body with Dedicated Scrolling */}
-        <div className="p-6 overflow-y-auto flex-1 text-slate-800 font-sans">{children}</div>
+        <div className="p-6 overflow-y-auto flex-1 text-[#334155] font-sans">{children}</div>
       </div>
     </div>
   );

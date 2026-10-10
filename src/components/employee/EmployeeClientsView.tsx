@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   UserCheck,
   Search,
@@ -58,11 +58,29 @@ export const EmployeeClientsView: React.FC<EmployeeClientsViewProps> = ({
     initialCaseStatusFilter === 'closed' ? 'closed' : 'active'
   );
   const [monthFilter, setMonthFilter] = useState('');
+  const dateInputRef = useRef<HTMLInputElement>(null);
+  const monthInputRef = useRef<HTMLInputElement>(null);
 
   // Screen Modes: 'list' | 'edit' | 'lenders' | 'view_details' | 'document_view'
   const [viewMode, setViewMode] = useState<'list' | 'edit' | 'lenders' | 'view_details' | 'document_view'>('list');
   const [currentClient, setCurrentClient] = useState<any>(null);
   const [selectedAgreementData, setSelectedAgreementData] = useState<any>(null);
+
+  // Add Client Form State
+  const [isAddClientOpen, setIsAddClientOpen] = useState(false);
+  const [addFormData, setAddFormData] = useState({
+    name: '',
+    phone: '',
+    email: '',
+    city: '',
+    total_debt: 500000,
+    settlement_target: 250000,
+    sx_services_fee: 8000,
+    fees_date: new Date().toISOString().split('T')[0],
+    fees_status: 'Pending',
+    case_status: 'active',
+    status: 'active'
+  });
 
   // Edit Client Form State (Matching Screenshot 4)
   const [editFormData, setEditFormData] = useState<any>({});
@@ -76,6 +94,59 @@ export const EmployeeClientsView: React.FC<EmployeeClientsViewProps> = ({
   const [lenderSaving, setLenderSaving] = useState(false);
 
   const [feedbackMsg, setFeedbackMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+  const handleAddClientSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!addFormData.name.trim() || !addFormData.phone.trim()) {
+      setFeedbackMsg({ type: 'error', text: 'Name and Phone are required' });
+      return;
+    }
+
+    if (addFormData.sx_services_fee !== undefined && (isNaN(Number(addFormData.sx_services_fee)) || Number(addFormData.sx_services_fee) < 0)) {
+      setFeedbackMsg({ type: 'error', text: 'Please enter a valid SX Services Fee' });
+      return;
+    }
+
+    try {
+      await api.createCRMClient({
+        ...addFormData,
+        sx_services_fee: Number(addFormData.sx_services_fee)
+      });
+      setFeedbackMsg({ type: 'success', text: `Client ${addFormData.name} onboarded successfully!` });
+      setIsAddClientOpen(false);
+      setAddFormData({
+        name: '',
+        phone: '',
+        email: '',
+        city: '',
+        total_debt: 500000,
+        settlement_target: 250000,
+        sx_services_fee: 8000,
+        fees_date: new Date().toISOString().split('T')[0],
+        fees_status: 'Pending',
+        case_status: 'active',
+        status: 'active'
+      });
+      fetchClients();
+    } catch (err: any) {
+      setFeedbackMsg({ type: 'error', text: err.message || 'Failed to add client' });
+    }
+  };
+
+  const handleDeleteClient = async (client: any) => {
+    const confirmDelete = window.confirm(
+      `Are you sure you want to delete client ${client.name} (${client.client_number})? This action cannot be undone.`
+    );
+    if (!confirmDelete) return;
+
+    try {
+      await api.deleteCRMClient(client.id);
+      setFeedbackMsg({ type: 'success', text: `Client ${client.name} deleted successfully` });
+      fetchClients();
+    } catch (err: any) {
+      setFeedbackMsg({ type: 'error', text: err.message || 'Failed to delete client' });
+    }
+  };
 
   const handleOpenAgreement = async (client: any) => {
     try {
@@ -152,18 +223,26 @@ export const EmployeeClientsView: React.FC<EmployeeClientsViewProps> = ({
   const handleOpenEdit = async (client: any) => {
     try {
       const detailed = await api.getCRMClient(client.id);
-      setCurrentClient(detailed.client || detailed);
+      const c = detailed.client || detailed;
+      setCurrentClient(c);
+      const sxFeeValue = c.sx_services_fee ?? c.sx_fee ?? c.monthly_fee ?? ((c.total_debt * 0.1) || 6000);
       setEditFormData({
-        ...(detailed.client || detailed),
-        sx_fee: (detailed.client || detailed).sx_fee || ((detailed.client || detailed).total_debt * 0.1) || 6000,
-        pending_amount: (detailed.client || detailed).pending_amount || 0,
-        total_received: (detailed.client || detailed).total_received || 0,
-        this_month_received: (detailed.client || detailed).this_month_received || 0
+        ...c,
+        sx_services_fee: sxFeeValue,
+        monthly_fee: sxFeeValue,
+        pending_amount: c.pending_amount || 0,
+        total_received: c.total_received || 0,
+        this_month_received: c.this_month_received || 0
       });
       setViewMode('edit');
     } catch (err) {
       setCurrentClient(client);
-      setEditFormData(client);
+      const sxFeeValue = client.sx_services_fee ?? client.sx_fee ?? client.monthly_fee ?? 6000;
+      setEditFormData({
+        ...client,
+        sx_services_fee: sxFeeValue,
+        monthly_fee: sxFeeValue
+      });
       setViewMode('edit');
     }
   };
@@ -215,8 +294,16 @@ export const EmployeeClientsView: React.FC<EmployeeClientsViewProps> = ({
     e.preventDefault();
     if (!currentClient) return;
 
+    if (editFormData.sx_services_fee !== undefined && (isNaN(Number(editFormData.sx_services_fee)) || Number(editFormData.sx_services_fee) < 0)) {
+      setFeedbackMsg({ type: 'error', text: 'Please enter a valid SX Services Fee' });
+      return;
+    }
+
     try {
-      await api.updateCRMClient(currentClient.id, editFormData);
+      await api.updateCRMClient(currentClient.id, {
+        ...editFormData,
+        sx_services_fee: Number(editFormData.sx_services_fee)
+      });
       setFeedbackMsg({ type: 'success', text: `Client ${currentClient.client_number} updated successfully` });
       setViewMode('list');
       fetchClients();
@@ -304,19 +391,36 @@ export const EmployeeClientsView: React.FC<EmployeeClientsViewProps> = ({
   };
 
   const exportToCSV = () => {
-    const headers = ['Client ID', 'Name', 'Phone', 'Email', 'City', 'SX Fee', 'Fees Date', 'Fees Status', 'Pending Amount', 'Total Received', 'Case Status', 'Advocate'];
+    const headers = [
+      'Client ID',
+      'Name',
+      'Phone',
+      'Email',
+      'City',
+      'SX Services Fee',
+      'Fees Date',
+      'Fees Status',
+      'Pending Amount',
+      'Total Received Amount',
+      'This Month Received',
+      'Case Status',
+      'Assigned Consultant Name',
+      'Assigned Advocate Name'
+    ];
     const rows = clients.map((c) => [
       c.client_number,
       c.name,
       c.phone,
       c.email || '',
       c.city || '',
-      c.sx_fee || '',
+      c.sx_services_fee !== undefined ? c.sx_services_fee : (c.sx_fee !== undefined ? c.sx_fee : (c.monthly_fee || 8000)),
       c.fees_date || '',
       c.fees_status || '',
       c.pending_amount || 0,
       c.total_received || 0,
-      c.case_status || c.status,
+      c.this_month_received || 0,
+      c.case_status || c.status || 'Active',
+      c.employee_name || 'Dhruv Consultant',
       c.advocate_name || ''
     ]);
 
@@ -329,6 +433,23 @@ export const EmployeeClientsView: React.FC<EmployeeClientsViewProps> = ({
     link.click();
     document.body.removeChild(link);
   };
+
+  const formatDisplayDate = (dateStr?: string) => {
+    if (!dateStr) return '—';
+    try {
+      const d = new Date(dateStr);
+      if (isNaN(d.getTime())) return dateStr;
+      const day = String(d.getDate()).padStart(2, '0');
+      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      return `${day} ${months[d.getMonth()]} ${d.getFullYear()}`;
+    } catch {
+      return dateStr;
+    }
+  };
+
+  const SortIcon = () => (
+    <span className="inline-flex items-center ml-0.5 text-slate-400 text-[8.5px] font-normal select-none shrink-0">⇅</span>
+  );
 
   // ==========================================
   // RENDER SCREEN 2: ADD / MANAGE LENDERS (Lender Page)
@@ -766,14 +887,17 @@ export const EmployeeClientsView: React.FC<EmployeeClientsViewProps> = ({
             <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2.5 text-xs">
               <div className="p-2.5 bg-gray-50 border border-gray-200 rounded-lg group hover:border-blue-300 transition-colors">
                 <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
-                  MONTHLY SX FEE
+                  SX SERVICES FEE
                 </span>
                 <div className="relative flex items-center">
                   <span className="absolute left-0 top-1/2 -translate-y-1/2 text-sm font-black text-slate-900 pointer-events-none">₹</span>
                   <input
                     type="number"
-                    value={editFormData.monthly_fee || ''}
-                    onChange={(e) => setEditFormData({ ...editFormData, monthly_fee: parseFloat(e.target.value) || 0 })}
+                    value={editFormData.sx_services_fee !== undefined ? editFormData.sx_services_fee : (editFormData.monthly_fee || '')}
+                    onChange={(e) => {
+                      const val = parseFloat(e.target.value) || 0;
+                      setEditFormData({ ...editFormData, sx_services_fee: val, monthly_fee: val });
+                    }}
                     className="w-full pl-3.5 bg-transparent border-b border-dashed border-gray-300 group-hover:border-blue-400 focus:border-blue-600 focus:outline-none text-sm font-black text-slate-900 placeholder:text-slate-300 transition-colors"
                     placeholder="8000"
                   />
@@ -956,31 +1080,56 @@ export const EmployeeClientsView: React.FC<EmployeeClientsViewProps> = ({
         </div>
       )}
 
-      {/* Breadcrumb & Top Bar Matching Screenshot 3 */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div className="flex items-center space-x-2 text-xs font-semibold text-slate-500">
-          <span className="text-[#1e40af] font-bold">Dashboard</span>
-          <span>/</span>
-          <span className="text-slate-800 font-bold">Clients</span>
+      {/* TOP AREA: ROW 1 - Breadcrumb, Active/Closed on Left, Add Client in Center, Month & Export on Right */}
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+        {/* Left: Breadcrumb / Title & Active/Closed Tabs */}
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="text-sm font-bold flex items-center space-x-1.5 mr-2">
+            <span className="text-[#1E40AF]">Dashboard</span>
+            <span className="text-slate-800">Clients</span>
+          </div>
+
+          <div className="flex items-center space-x-2">
+            <button
+              type="button"
+              onClick={() => setActiveTab('active')}
+              className={`px-3.5 py-1 rounded-full text-xs font-bold transition-all flex items-center space-x-1.5 cursor-pointer shadow-2xs ${activeTab === 'active'
+                  ? 'bg-[#111827] text-white'
+                  : 'bg-white border border-gray-300 text-slate-700 hover:bg-gray-50'
+                }`}
+            >
+              <span className="h-2 w-2 rounded-full bg-emerald-500"></span>
+              <span>Active</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setActiveTab('closed')}
+              className={`px-3.5 py-1 rounded-full text-xs font-bold transition-all flex items-center space-x-1.5 cursor-pointer shadow-2xs ${activeTab === 'closed'
+                  ? 'bg-[#111827] text-white'
+                  : 'bg-white border border-gray-300 text-slate-700 hover:bg-gray-50'
+                }`}
+            >
+              <span className="h-2 w-2 rounded-full bg-rose-500"></span>
+              <span>Closed</span>
+            </button>
+          </div>
         </div>
 
-        {/* Right Controls: Calendar Date Filter, Month Selector & Export */}
-        <div className="flex flex-wrap items-center gap-2">
-          <CalendarDateFilter
-            selectedDate={selectedDate}
-            onDateChange={(d) => {
-              setSelectedDate(d);
-              setPage(1);
-            }}
-            fromDate={fromDate}
-            toDate={toDate}
-            onRangeChange={(f, t) => {
-              setFromDate(f);
-              setToDate(t);
-              setPage(1);
-            }}
-          />
+        {/* Center: Add Client Button */}
+        <div className="flex items-center justify-center">
+          <button
+            type="button"
+            onClick={() => setIsAddClientOpen(true)}
+            className="px-4 py-1.5 rounded-full bg-[#E2ECE5] hover:bg-[#D4E4D8] border border-[#B2CCA8] text-slate-800 text-xs font-bold transition-all flex items-center space-x-1.5 shadow-2xs cursor-pointer"
+          >
+            <Plus className="h-3.5 w-3.5 text-slate-700" />
+            <span>Add Client</span>
+          </button>
+        </div>
 
+        {/* Right: Month Wise, Month/Year Selector, Export Button */}
+        <div className="flex flex-wrap items-center gap-2">
           <select
             value={monthFilter}
             onChange={(e) => {
@@ -992,17 +1141,53 @@ export const EmployeeClientsView: React.FC<EmployeeClientsViewProps> = ({
               }
               setPage(1);
             }}
-            className="px-3 py-1.5 bg-white border border-gray-300 rounded-lg text-xs font-semibold text-slate-700 focus:outline-none"
+            className="px-3 py-1 bg-white border border-gray-300 rounded-lg text-xs font-medium text-slate-700 focus:outline-none shadow-2xs cursor-pointer"
           >
             <option value="">Month Wise</option>
+            <option value="2026-09">September - 2026</option>
             <option value="2026-08">August - 2026</option>
             <option value="2026-07">July - 2026</option>
             <option value="2026-06">June - 2026</option>
           </select>
 
+          <div
+            onClick={() => {
+              try {
+                monthInputRef.current?.showPicker();
+              } catch {
+                monthInputRef.current?.focus();
+              }
+            }}
+            className="relative flex items-center px-3 py-1 bg-white hover:bg-slate-50 border border-gray-300 rounded-lg text-xs font-medium text-slate-700 shadow-2xs space-x-1.5 cursor-pointer transition-colors"
+            title="Click calendar to choose month"
+          >
+            <Calendar className="h-3.5 w-3.5 text-slate-500 cursor-pointer" />
+            <span>
+              {monthFilter
+                ? new Date(monthFilter + '-01').toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+                : 'August, 2026'}
+            </span>
+            <input
+              ref={monthInputRef}
+              type="month"
+              value={monthFilter || '2026-08'}
+              onChange={(e) => {
+                setMonthFilter(e.target.value);
+                if (e.target.value) {
+                  setSelectedDate('');
+                  setFromDate('');
+                  setToDate('');
+                }
+                setPage(1);
+              }}
+              className="absolute inset-0 opacity-0 w-full h-full cursor-pointer pointer-events-none"
+            />
+          </div>
+
           <button
+            type="button"
             onClick={exportToCSV}
-            className="px-3 py-1.5 rounded-lg bg-[#15803d] hover:bg-emerald-800 text-white text-xs font-bold transition-all flex items-center space-x-1 shadow-sm"
+            className="px-3.5 py-1 rounded-lg bg-[#15803D] hover:bg-[#166534] text-white text-xs font-bold transition-all flex items-center space-x-1.5 shadow-2xs cursor-pointer"
           >
             <Download className="h-3.5 w-3.5" />
             <span>Export</span>
@@ -1010,228 +1195,263 @@ export const EmployeeClientsView: React.FC<EmployeeClientsViewProps> = ({
         </div>
       </div>
 
-      {/* Filter Tabs & Search Bar Matching Screenshot 3 */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div className="flex items-center space-x-2">
-          <button
-            onClick={() => setActiveTab('active')}
-            className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all flex items-center space-x-1.5 ${activeTab === 'active'
-              ? 'bg-[#111827] text-white shadow-sm'
-              : 'bg-white border border-gray-300 text-slate-700 hover:bg-gray-50'
-              }`}
-          >
-            <span className="h-2 w-2 rounded-full bg-emerald-500"></span>
-            <span>Active</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('closed')}
-            className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all flex items-center space-x-1.5 ${activeTab === 'closed'
-              ? 'bg-[#111827] text-white shadow-sm'
-              : 'bg-white border border-gray-300 text-slate-700 hover:bg-gray-50'
-              }`}
-          >
-            <span className="h-2 w-2 rounded-full bg-rose-500"></span>
-            <span>Closed</span>
-          </button>
+      {/* TOP AREA: ROW 2 - Search & Date filter with thin green border */}
+      <div className="flex flex-wrap items-center gap-3">
+        <div className="relative">
+          <input
+            type="text"
+            placeholder="Search..."
+            value={search}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setPage(1);
+            }}
+            className="w-56 sm:w-64 px-4 py-1.5 bg-white border border-[#86EFAC] rounded-full text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-emerald-500 shadow-2xs"
+          />
         </div>
 
-        <div className="flex items-center space-x-2">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
-            <input
-              type="text"
-              placeholder="Search..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="pl-8 pr-3 py-1.5 bg-white border border-gray-300 rounded-lg text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-blue-600"
-            />
-          </div>
+        <div className="relative flex items-center">
+          <input
+            ref={dateInputRef}
+            type="date"
+            value={selectedDate || ''}
+            onChange={(e) => {
+              setSelectedDate(e.target.value);
+              setPage(1);
+            }}
+            onClick={() => {
+              try {
+                dateInputRef.current?.showPicker();
+              } catch {}
+            }}
+            className="w-38 pl-3.5 pr-8 py-1.5 bg-white border border-[#86EFAC] rounded-full text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-emerald-500 shadow-2xs cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-0"
+          />
+          <button
+            type="button"
+            onClick={() => {
+              try {
+                dateInputRef.current?.showPicker();
+              } catch {
+                dateInputRef.current?.focus();
+              }
+            }}
+            className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 text-slate-500 hover:text-emerald-600 transition-colors cursor-pointer"
+            title="Open Calendar Picker"
+          >
+            <Calendar className="h-3.5 w-3.5" />
+          </button>
         </div>
       </div>
 
-      {/* Bulk Action & Clients Table */}
-      <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-        <div className="p-3 border-b border-gray-200 flex items-center justify-between bg-gray-50/50">
-          <button
-            onClick={() => setFeedbackMsg({ type: 'success', text: 'Bulk email notices sent to selected clients successfully.' })}
-            className="px-3 py-1.5 rounded-lg bg-[#111827] hover:bg-slate-800 text-white text-xs font-bold flex items-center space-x-1.5 shadow-sm"
-          >
-            <Mail className="h-3.5 w-3.5" />
-            <span>Send Bulk Mail</span>
-          </button>
-          <span className="text-xs text-slate-500 font-semibold">{total} Clients Loaded</span>
-        </div>
-
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
-            <thead className="bg-gray-50/90 text-slate-600 uppercase text-[10px] font-bold tracking-wider border-b border-gray-200">
+      {/* Clients Table Exactly Following Screenshot Structure & Column Sequence - Single-Glance No-Scroll */}
+      <div className="bg-white border border-[#E5E7EB] shadow-2xs w-full max-w-full overflow-hidden">
+        <table className="w-full text-left border-collapse" style={{ tableLayout: 'fixed', width: '100%', maxWidth: '100%' }}>
+          <colgroup>
+            <col style={{ width: '2.0%' }} />
+            <col style={{ width: '2.0%' }} />
+            <col style={{ width: '5.0%' }} />
+            <col style={{ width: '7.5%' }} />
+            <col style={{ width: '7.0%' }} />
+            <col style={{ width: '10.5%' }} />
+            <col style={{ width: '5.5%' }} />
+            <col style={{ width: '6.2%' }} />
+            <col style={{ width: '5.8%' }} />
+            <col style={{ width: '5.2%' }} />
+            <col style={{ width: '5.8%' }} />
+            <col style={{ width: '6.2%' }} />
+            <col style={{ width: '6.0%' }} />
+            <col style={{ width: '4.8%' }} />
+            <col style={{ width: '6.5%' }} />
+            <col style={{ width: '8.0%' }} />
+            <col style={{ width: '6.0%' }} />
+          </colgroup>
+          <thead className="bg-[#FFFFFF] text-[#4B5563] text-[10px] font-semibold border-b border-[#E5E7EB] leading-tight select-none">
+            <tr>
+              <th className="py-2.5 px-1 text-center">
+                <input type="checkbox" className="h-3.5 w-3.5 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer" />
+              </th>
+              <th className="py-2.5 px-1 text-center whitespace-nowrap" title="#">#<SortIcon /></th>
+              <th className="py-2.5 px-1" title="Client Id"><span className="inline-flex items-center">Client Id<SortIcon /></span></th>
+              <th className="py-2.5 px-1" title="Name"><span className="inline-flex items-center">Name<SortIcon /></span></th>
+              <th className="py-2.5 px-1" title="Phone"><span className="inline-flex items-center">Phone<SortIcon /></span></th>
+              <th className="py-2.5 px-1" title="Email"><span className="inline-flex items-center">Email<SortIcon /></span></th>
+              <th className="py-2.5 px-1" title="City"><span className="inline-flex items-center">City<SortIcon /></span></th>
+              <th className="py-2.5 px-1" title="SX Services Fee"><span className="inline-flex items-center">SX Services Fee<SortIcon /></span></th>
+              <th className="py-2.5 px-1" title="Fees Date"><span className="inline-flex items-center">Fees Date<SortIcon /></span></th>
+              <th className="py-2.5 px-1 text-center" title="Fees Status"><span className="inline-flex items-center justify-center">Fees Status<SortIcon /></span></th>
+              <th className="py-2.5 px-1" title="Pending Amount"><span className="inline-flex items-center">Pending Amount<SortIcon /></span></th>
+              <th className="py-2.5 px-1" title="Total Received Amount"><span className="inline-flex items-center">Total Received Amount<SortIcon /></span></th>
+              <th className="py-2.5 px-1" title="This Month Received"><span className="inline-flex items-center">this month received<SortIcon /></span></th>
+              <th className="py-2.5 px-1 text-center" title="Case Status"><span className="inline-flex items-center justify-center">Case Status<SortIcon /></span></th>
+              <th className="py-2.5 px-1" title="Assigned Consultant Name"><span className="inline-flex items-center">Assigned Consultant Name<SortIcon /></span></th>
+              <th className="py-2.5 px-1" title="Assigned Advocate Name"><span className="inline-flex items-center">Assigned Advocate Name<SortIcon /></span></th>
+              <th className="py-2.5 px-1 text-center whitespace-nowrap" title="Actions"><span className="inline-flex items-center justify-center">Actions<SortIcon /></span></th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-[#E5E7EB] text-slate-700 text-[10px]">
+            {loading ? (
               <tr>
-                <th className="py-3 px-3 w-8"><input type="checkbox" className="rounded" /></th>
-                <th className="py-3 px-3 w-10">#</th>
-                <th className="py-3 px-3">Client Id</th>
-                <th className="py-3 px-3">Name</th>
-                <th className="py-3 px-3">Phone</th>
-                <th className="py-3 px-3">Email</th>
-                <th className="py-3 px-3">City</th>
-                <th className="py-3 px-3 whitespace-nowrap">Monthly SX Fee</th>
-                <th className="py-3 px-3">Fees Date</th>
-                <th className="py-3 px-3">Fees Status</th>
-                <th className="py-3 px-3">Pending Amount</th>
-                <th className="py-3 px-3">Total Received</th>
-                <th className="py-3 px-3">This Month</th>
-                <th className="py-3 px-3">Case Status</th>
-                <th className="py-3 px-3">Assigned Consultant</th>
-                <th className="py-3 px-3">Assigned Advocate</th>
-                <th className="py-3 px-3 text-right">Actions</th>
+                <td colSpan={17} className="py-10 text-center text-slate-400">
+                  Loading client portfolio...
+                </td>
               </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200 text-slate-700">
-              {loading ? (
-                <tr>
-                  <td colSpan={17} className="py-12 text-center text-slate-400">
-                    Loading client portfolio...
-                  </td>
-                </tr>
-              ) : clients.length > 0 ? (
-                clients.map((c, idx) => (
-                  <tr key={c.id} className="hover:bg-gray-50/80 transition-colors">
-                    <td className="py-3 px-3"><input type="checkbox" className="rounded" /></td>
-                    <td className="py-3 px-3 text-slate-500 font-mono">{(page - 1) * limit + idx + 1}</td>
-                    <td className="py-3 px-3 font-mono font-bold text-[#1e40af] whitespace-nowrap">
+            ) : clients.length > 0 ? (
+              clients.map((c, idx) => {
+                const isEven = idx % 2 === 1;
+                const isPaid = (c.fees_status || '').toLowerCase() === 'paid';
+                const isClosed = (c.case_status || c.status || '').toLowerCase() === 'closed';
+                const feeValue = c.sx_services_fee !== undefined
+                  ? c.sx_services_fee
+                  : (c.sx_fee !== undefined ? c.sx_fee : (c.monthly_fee || 8000));
+                const formattedDate = formatDisplayDate(c.fees_date || c.created_at);
+
+                return (
+                  <tr
+                    key={c.id}
+                    style={{ backgroundColor: isEven ? '#F9FAFB' : '#FFFFFF' }}
+                    className="transition-colors hover:bg-slate-50 border-b border-[#E5E7EB]"
+                  >
+                    <td className="py-2 px-1 text-center">
+                      <input type="checkbox" className="h-3.5 w-3.5 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer" />
+                    </td>
+                    <td className="py-2 px-1 text-center text-slate-500 font-medium" title={`${(page - 1) * limit + idx + 1}`}>
+                      {(page - 1) * limit + idx + 1}
+                    </td>
+                    <td className="py-2 px-1 font-bold text-slate-800 whitespace-nowrap" title={c.client_number}>
                       {c.client_number}
                     </td>
-                    <td className="py-3 px-3 font-bold text-slate-900 whitespace-nowrap">{c.name}</td>
-                    <td className="py-3 px-3 font-mono text-slate-700">{c.phone}</td>
-                    <td className="py-3 px-3 text-slate-600 truncate max-w-[140px]">{c.email || '—'}</td>
-                    <td className="py-3 px-3 text-slate-600">{c.city || '—'}</td>
-                    <td className="py-3 px-3 whitespace-nowrap">
-                      <div className="font-bold text-slate-900">
-                        {formatCurrency(c.monthly_fee || 8000)}{' '}
-                        <span className="text-[10px] text-slate-500 font-normal">/mo</span>
-                      </div>
-                      <div className="text-[10px] text-slate-500 font-medium">
-                        Total: {formatCurrency(c.total_agreement_fee || ((c.monthly_fee || 8000) * (c.duration_months || 6)))}
-                      </div>
+                    <td className="py-2 px-1 font-bold text-slate-900 truncate" title={c.name}>
+                      {c.name}
                     </td>
-                    <td className="py-3 px-3 text-slate-600 whitespace-nowrap font-mono text-[11px]">
-                      {c.fees_date || '—'}
+                    <td className="py-2 px-1 text-slate-700 whitespace-nowrap font-mono text-[9.5px]" title={c.phone}>
+                      {c.phone}
                     </td>
-                    <td className="py-3 px-3">
-                      <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${c.fees_status === 'Paid'
-                        ? 'bg-emerald-100 text-emerald-800'
-                        : 'bg-amber-100 text-amber-800'
-                        }`}>
-                        {c.fees_status || 'Pending'}
+                    <td className="py-2 px-1 text-slate-600 truncate text-[9.5px]" title={c.email || '—'}>
+                      {c.email || '—'}
+                    </td>
+                    <td className="py-2 px-1 text-slate-600 capitalize truncate text-[9.5px]" title={c.city || '—'}>
+                      {c.city || '—'}
+                    </td>
+                    <td className="py-2 px-1 font-semibold text-slate-900 whitespace-nowrap" title={`${Number(feeValue || 0).toFixed(2)}`}>
+                      {Number(feeValue || 0).toFixed(2)}
+                    </td>
+                    <td className="py-2 px-1 text-slate-700 whitespace-nowrap text-[9.5px]" title={formattedDate}>
+                      {formattedDate}
+                    </td>
+                    <td
+                      className="py-2 px-1 font-bold whitespace-nowrap text-center text-[9.5px]"
+                      style={{
+                        backgroundColor: isPaid ? '#DCFCE7' : '#FEE2E2',
+                        color: isPaid ? '#15803D' : '#DC2626'
+                      }}
+                      title={c.fees_status || 'Pending'}
+                    >
+                      {c.fees_status || 'Pending'}
+                    </td>
+                    <td
+                      className="py-2 px-1 font-bold whitespace-nowrap text-center"
+                      style={{ backgroundColor: '#FEE2E2', color: '#DC2626' }}
+                      title={`${Math.round(c.pending_amount || 0)}`}
+                    >
+                      {Math.round(c.pending_amount || 0)}
+                    </td>
+                    <td
+                      className="py-2 px-1 font-bold whitespace-nowrap text-center"
+                      style={{ backgroundColor: '#DCFCE7', color: '#15803D' }}
+                      title={`${Math.round(c.total_received || 0)}`}
+                    >
+                      {Math.round(c.total_received || 0)}
+                    </td>
+                    <td
+                      className="py-2 px-1 font-bold whitespace-nowrap text-center"
+                      style={{ backgroundColor: '#DCFCE7', color: '#15803D' }}
+                      title={`${Math.round(c.this_month_received || 0)}`}
+                    >
+                      {Math.round(c.this_month_received || 0)}
+                    </td>
+                    <td className="py-2 px-1 text-center whitespace-nowrap">
+                      <span
+                        className={`px-2 py-0.5 rounded-full font-bold text-[9px] inline-block text-white leading-none ${
+                          isClosed ? 'bg-[#DC2626]' : 'bg-[#15803D]'
+                        }`}
+                        title={isClosed ? 'Closed' : 'Active'}
+                      >
+                        {isClosed ? 'Closed' : 'Active'}
                       </span>
                     </td>
-                    <td className="py-3 px-3 font-bold text-rose-700 bg-rose-50/50">
-                      {formatCurrency(c.pending_amount)}
+                    <td className="py-2 px-1 text-slate-700 truncate text-[9.5px]" title={c.employee_name || 'Dhruv'}>
+                      {c.employee_name || 'Dhruv'}
                     </td>
-                    <td className="py-3 px-3 font-bold text-emerald-700">
-                      {formatCurrency(c.total_received)}
+                    <td className="py-2 px-1 text-slate-700 truncate text-[9.5px]" title={c.advocate_name || 'Adv Kalla Sudharani'}>
+                      {c.advocate_name || 'Adv Kalla Sudharani'}
                     </td>
-                    <td className="py-3 px-3 font-mono text-slate-700">
-                      {formatCurrency(c.this_month_received || 0)}
-                    </td>
-                    <td className="py-3 px-3">
-                      <span className="px-2 py-0.5 rounded bg-emerald-700 text-white font-bold text-[10px]">
-                        {c.case_status || 'Active'}
-                      </span>
-                    </td>
-                    <td className="py-3 px-3 text-slate-700 whitespace-nowrap">
-                      {c.employee_name || 'Dhruv Consultant'}
-                    </td>
-                    <td className="py-3 px-3 whitespace-nowrap">
-                      {c.advocate_name ? (
-                        <span className="font-semibold text-slate-800 text-xs flex items-center space-x-1">
-                          <span className="h-1.5 w-1.5 rounded-full bg-indigo-600 inline-block"></span>
-                          <span>{c.advocate_name}</span>
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-amber-50 border border-amber-200 text-amber-700">
-                          Not Assigned
-                        </span>
-                      )}
-                    </td>
-                    <td className="py-2 px-3 text-right">
-                      <div className="flex items-center justify-end space-x-1.5">
-                        {/* Action 1: View Client Agreement Document */}
+                    <td className="py-1 px-1 text-center whitespace-nowrap">
+                      <div className="flex items-center justify-center space-x-1">
+                        {/* 1. View */}
                         <button
-                          onClick={() => handleOpenAgreement(c)}
-                          title="View Client Agreement"
-                          className="h-7 w-7 rounded border border-gray-200 bg-white hover:bg-gray-50 text-slate-600 hover:text-indigo-600 transition-colors flex items-center justify-center shadow-xs"
-                        >
-                          <FileSignature className="h-3.5 w-3.5" />
-                        </button>
-
-                        {/* Action 2: View Client Details */}
-                        <button
+                          type="button"
                           onClick={() => handleOpenViewDetails(c)}
                           title="View Client Details"
-                          className="h-7 w-7 rounded border border-gray-200 bg-white hover:bg-gray-50 text-slate-600 hover:text-cyan-600 transition-colors flex items-center justify-center shadow-xs"
+                          className="h-6 w-6 rounded border border-blue-400 bg-white hover:bg-blue-50 text-blue-500 flex items-center justify-center shadow-2xs cursor-pointer transition-colors"
                         >
-                          <Eye className="h-3.5 w-3.5" />
+                          <Eye className="h-3 w-3" />
                         </button>
 
-                        {/* Action 3: Edit Client Information */}
+                        {/* 2. Edit */}
                         <button
+                          type="button"
                           onClick={() => handleOpenEdit(c)}
-                          title="Edit Client Information"
-                          className="h-7 w-7 rounded border border-gray-200 bg-white hover:bg-gray-50 text-slate-600 hover:text-amber-600 transition-colors flex items-center justify-center shadow-xs"
+                          title="Edit Client"
+                          className="h-6 w-6 rounded border border-amber-400 bg-white hover:bg-amber-50 text-amber-500 flex items-center justify-center shadow-2xs cursor-pointer transition-colors"
                         >
-                          <Edit2 className="h-3.5 w-3.5" />
+                          <Edit className="h-3 w-3" />
                         </button>
 
-                        {/* Action 4: Manage Multiple Lenders / Case Details */}
+                        {/* 3. Add Lender */}
                         <button
+                          type="button"
                           onClick={() => handleOpenLenders(c)}
-                          title="Lender / Case Details"
-                          className="h-7 w-7 rounded border border-gray-200 bg-white hover:bg-gray-50 text-slate-600 hover:text-purple-600 transition-colors flex items-center justify-center shadow-xs"
+                          title="Add Lender"
+                          className="h-6 w-6 rounded border border-blue-400 bg-white hover:bg-blue-50 text-blue-500 flex items-center justify-center shadow-2xs cursor-pointer transition-colors"
                         >
-                          <Building2 className="h-3.5 w-3.5" />
+                          <Building2 className="h-3 w-3" />
                         </button>
                       </div>
                     </td>
                   </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={17} className="py-16 text-center text-slate-400">
-                    No clients recorded matching current filters.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+                );
+              })
+            ) : (
+              <tr>
+                <td colSpan={17} className="py-12 text-center text-slate-400">
+                  No clients recorded matching current filters.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Bottom Area: Pagination box '1' on left, followed by Send Bulk Mail button */}
+      <div className="space-y-3 pt-2">
+        <div className="flex items-center space-x-1">
+          <button
+            type="button"
+            className="px-2.5 py-1 bg-white border border-gray-300 rounded text-xs font-bold text-slate-700 shadow-2xs"
+          >
+            1
+          </button>
         </div>
 
-        {/* Footer Pagination */}
-        <div className="p-3 bg-gray-50/60 border-t border-gray-200 flex items-center justify-between text-xs text-slate-600">
-          <span>
-            Showing {clients.length > 0 ? (page - 1) * limit + 1 : 0} to{' '}
-            {Math.min(page * limit, total)} of {total} entries
-          </span>
-
-          <div className="flex items-center space-x-1">
-            <button
-              disabled={page <= 1}
-              onClick={() => setPage(page - 1)}
-              className="px-2 py-1 bg-white border border-gray-300 rounded text-slate-700 disabled:opacity-40"
-            >
-              &lt;
-            </button>
-            <span className="px-3 py-1 bg-emerald-700 text-white font-bold rounded">
-              {page}
-            </span>
-            <button
-              disabled={page * limit >= total}
-              onClick={() => setPage(page + 1)}
-              className="px-2 py-1 bg-white border border-gray-300 rounded text-slate-700 disabled:opacity-40"
-            >
-              &gt;
-            </button>
-          </div>
+        <div>
+          <button
+            type="button"
+            onClick={() => setFeedbackMsg({ type: 'success', text: 'Bulk email notices sent to selected clients successfully.' })}
+            className="px-4 py-2 rounded-md bg-[#1E293B] hover:bg-[#0F172A] text-white text-xs font-bold flex items-center space-x-2 shadow-sm cursor-pointer"
+          >
+            <Mail className="h-3.5 w-3.5" />
+            <span>Send Bulk Mail</span>
+          </button>
         </div>
       </div>
 
@@ -1321,6 +1541,121 @@ export const EmployeeClientsView: React.FC<EmployeeClientsViewProps> = ({
             </button>
           </div>
         </div>
+      </Modal>
+
+      {/* ADD CLIENT MODAL */}
+      <Modal
+        isOpen={isAddClientOpen}
+        onClose={() => setIsAddClientOpen(false)}
+        title="Add Client"
+        subtitle="Register new client case portfolio into CRM."
+        maxWidth="lg"
+      >
+        <form onSubmit={handleAddClientSubmit} className="space-y-4 text-xs">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label className="text-[11px] font-semibold text-slate-600 block mb-1">Client Name *</label>
+              <input
+                type="text"
+                required
+                placeholder="Full Name"
+                value={addFormData.name}
+                onChange={(e) => setAddFormData({ ...addFormData, name: e.target.value })}
+                className="w-full px-3 py-1.5 bg-white border border-[#E2E8F0] rounded-lg text-slate-800 focus:outline-none focus:border-blue-600"
+              />
+            </div>
+            <div>
+              <label className="text-[11px] font-semibold text-slate-600 block mb-1">Phone Number *</label>
+              <input
+                type="tel"
+                required
+                placeholder="+91 9876543210"
+                value={addFormData.phone}
+                onChange={(e) => setAddFormData({ ...addFormData, phone: e.target.value })}
+                className="w-full px-3 py-1.5 bg-white border border-[#E2E8F0] rounded-lg text-slate-800 focus:outline-none focus:border-blue-600"
+              />
+            </div>
+            <div>
+              <label className="text-[11px] font-semibold text-slate-600 block mb-1">Email Address</label>
+              <input
+                type="email"
+                placeholder="client@example.com"
+                value={addFormData.email}
+                onChange={(e) => setAddFormData({ ...addFormData, email: e.target.value })}
+                className="w-full px-3 py-1.5 bg-white border border-[#E2E8F0] rounded-lg text-slate-800 focus:outline-none focus:border-blue-600"
+              />
+            </div>
+            <div>
+              <label className="text-[11px] font-semibold text-slate-600 block mb-1">City</label>
+              <input
+                type="text"
+                placeholder="e.g. New Delhi"
+                value={addFormData.city}
+                onChange={(e) => setAddFormData({ ...addFormData, city: e.target.value })}
+                className="w-full px-3 py-1.5 bg-white border border-[#E2E8F0] rounded-lg text-slate-800 focus:outline-none focus:border-blue-600"
+              />
+            </div>
+            <div>
+              <label className="text-[11px] font-semibold text-slate-600 block mb-1">SX Services Fee (₹) *</label>
+              <input
+                type="number"
+                required
+                min="0"
+                placeholder="8000"
+                value={addFormData.sx_services_fee}
+                onChange={(e) => setAddFormData({ ...addFormData, sx_services_fee: parseFloat(e.target.value) || 0 })}
+                className="w-full px-3 py-1.5 bg-white border border-[#E2E8F0] rounded-lg text-slate-800 font-bold focus:outline-none focus:border-blue-600"
+              />
+            </div>
+            <div>
+              <label className="text-[11px] font-semibold text-slate-600 block mb-1">Total Outstanding Debt (₹)</label>
+              <input
+                type="number"
+                min="0"
+                placeholder="500000"
+                value={addFormData.total_debt}
+                onChange={(e) => setAddFormData({ ...addFormData, total_debt: parseFloat(e.target.value) || 0 })}
+                className="w-full px-3 py-1.5 bg-white border border-[#E2E8F0] rounded-lg text-slate-800 focus:outline-none focus:border-blue-600"
+              />
+            </div>
+            <div>
+              <label className="text-[11px] font-semibold text-slate-600 block mb-1">Fees Date</label>
+              <input
+                type="date"
+                value={addFormData.fees_date}
+                onChange={(e) => setAddFormData({ ...addFormData, fees_date: e.target.value })}
+                className="w-full px-3 py-1.5 bg-white border border-[#E2E8F0] rounded-lg text-slate-800 focus:outline-none focus:border-blue-600"
+              />
+            </div>
+            <div>
+              <label className="text-[11px] font-semibold text-slate-600 block mb-1">Fees Status</label>
+              <select
+                value={addFormData.fees_status}
+                onChange={(e) => setAddFormData({ ...addFormData, fees_status: e.target.value })}
+                className="w-full px-3 py-1.5 bg-white border border-[#E2E8F0] rounded-lg text-slate-800 focus:outline-none focus:border-blue-600"
+              >
+                <option value="Pending">Pending</option>
+                <option value="Paid">Paid</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-end space-x-2.5 pt-3 border-t border-gray-200">
+            <button
+              type="button"
+              onClick={() => setIsAddClientOpen(false)}
+              className="px-3.5 py-1.5 rounded-lg border border-gray-300 hover:bg-gray-50 text-slate-700 font-semibold cursor-pointer"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-4 py-1.5 rounded-lg bg-[#2563eb] hover:bg-blue-700 text-white font-bold shadow-xs cursor-pointer"
+            >
+              Add Client
+            </button>
+          </div>
+        </form>
       </Modal>
     </div>
   );

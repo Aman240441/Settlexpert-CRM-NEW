@@ -26,6 +26,7 @@ export const ClientsView: React.FC = () => {
     email: '',
     total_debt: 750000,
     settlement_target: 350000,
+    sx_services_fee: 8000,
     fee_plan_id: '',
     manager_id: '',
     advocate_id: '',
@@ -63,6 +64,10 @@ export const ClientsView: React.FC = () => {
 
   const handleCreateSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (formData.sx_services_fee !== undefined && (isNaN(Number(formData.sx_services_fee)) || Number(formData.sx_services_fee) < 0)) {
+      setFeedbackMsg({ type: 'error', text: 'Please enter a valid SX Services Fee' });
+      return;
+    }
     try {
       await api.createClient(formData);
       setFeedbackMsg({ type: 'success', text: `Client ${formData.name} onboarded successfully!` });
@@ -146,17 +151,17 @@ export const ClientsView: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl font-black text-slate-900 tracking-tight flex items-center gap-2">
-            <Users className="h-5 w-5 text-emerald-600" />
+          <h2 className="text-xl font-black text-[#1E293B] tracking-tight flex items-center gap-2">
+            <Users className="h-5 w-5 text-[#3B82F6]" />
             <span>CRM — Retained Clients</span>
           </h2>
-          <p className="text-xs text-slate-500 mt-0.5">
+          <p className="text-xs text-[#64748B] mt-0.5">
             Active debt settlement portfolios, assigned advocates, and resolution target matrices.
           </p>
         </div>
         <button
           onClick={() => setIsCreateOpen(true)}
-          className="inline-flex items-center space-x-2 px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold transition-all shadow-md shadow-blue-600/20 cursor-pointer"
+          className="inline-flex items-center space-x-2 px-4 py-2.5 rounded-xl bg-[#3B82F6] hover:bg-[#2563EB] text-white text-xs font-bold transition-all shadow-xs cursor-pointer"
         >
           <Plus className="h-4 w-4" />
           <span>Add Client</span>
@@ -164,22 +169,22 @@ export const ClientsView: React.FC = () => {
       </div>
 
       {/* Search */}
-      <div className="relative bg-white p-3 rounded-2xl border border-slate-200/80 shadow-xs">
-        <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+      <div className="relative bg-white p-3 rounded-2xl border border-[#E2E8F0] shadow-xs">
+        <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-4 w-4 text-[#94A3B8]" />
         <input
           type="text"
           placeholder="Search clients by name, client number, or phone..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full pl-10 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:bg-white transition-all"
+          className="w-full pl-10 pr-3 py-2 bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl text-xs text-[#334155] placeholder-[#94A3B8] focus:outline-none focus:border-[#3B82F6] focus:bg-white transition-all"
         />
       </div>
 
       {/* Table */}
-      <div className="rounded-2xl bg-white border border-slate-200/80 overflow-hidden shadow-xs">
+      <div className="rounded-2xl bg-white border border-[#E2E8F0] overflow-hidden shadow-xs">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
-            <thead className="bg-slate-50 text-slate-500 uppercase text-[10px] font-bold tracking-wider border-b border-slate-200">
+            <thead className="bg-[#F8FAFC] text-[#334155] uppercase text-[10px] font-bold tracking-wider border-b border-[#E2E8F0]">
               <tr>
                 <th className="py-3.5 px-4">Client Number / Date</th>
                 <th className="py-3.5 px-4">Client Name</th>
@@ -191,16 +196,16 @@ export const ClientsView: React.FC = () => {
                 <th className="py-3.5 px-4 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 text-slate-700">
+            <tbody className="divide-y divide-[#E2E8F0] text-[#475569]">
               {loading ? (
                 <tr>
-                  <td colSpan={8} className="py-8 text-center text-slate-400 font-medium">
+                  <td colSpan={8} className="py-8 text-center text-[#64748B] font-medium">
                     Loading clients...
                   </td>
                 </tr>
               ) : filteredClients.length > 0 ? (
                 filteredClients.map((c) => (
-                  <tr key={c.id} className="hover:bg-slate-50/80 transition-colors">
+                  <tr key={c.id} className="hover:bg-[#F8FAFC] transition-colors">
                     <td className="py-3.5 px-4">
                       <button
                         onClick={() => handleOpenClientDetails(c)}
@@ -295,53 +300,65 @@ export const ClientsView: React.FC = () => {
         <form onSubmit={handleCreateSubmit} className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="text-xs font-semibold text-slate-300 block mb-1">Full Name *</label>
+              <label className="text-xs font-semibold text-[#334155] block mb-1">Full Name *</label>
               <input
                 type="text"
                 required
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 placeholder="e.g. Vikramaditya Rao"
-                className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-blue-500"
+                className="w-full px-3 py-2 bg-white border border-[#E2E8F0] rounded-xl text-xs text-[#334155] placeholder-[#94A3B8] focus:outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6]/20"
               />
             </div>
             <div>
-              <label className="text-xs font-semibold text-slate-300 block mb-1">Phone Number *</label>
+              <label className="text-xs font-semibold text-[#334155] block mb-1">Phone Number *</label>
               <input
                 type="text"
                 required
                 value={formData.phone}
                 onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                 placeholder="+91 9876543210"
-                className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-blue-500"
+                className="w-full px-3 py-2 bg-white border border-[#E2E8F0] rounded-xl text-xs text-[#334155] placeholder-[#94A3B8] focus:outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6]/20"
               />
             </div>
             <div>
-              <label className="text-xs font-semibold text-slate-300 block mb-1">Total Debt Amount (₹) *</label>
+              <label className="text-xs font-semibold text-[#334155] block mb-1">Total Debt Amount (₹) *</label>
               <input
                 type="number"
                 required
                 value={formData.total_debt}
                 onChange={(e) => setFormData({ ...formData, total_debt: parseFloat(e.target.value) || 0 })}
-                className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-blue-500"
+                className="w-full px-3 py-2 bg-white border border-[#E2E8F0] rounded-xl text-xs text-[#334155] focus:outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6]/20"
               />
             </div>
             <div>
-              <label className="text-xs font-semibold text-slate-300 block mb-1">Settlement Target (₹) *</label>
+              <label className="text-xs font-semibold text-[#334155] block mb-1">Settlement Target (₹) *</label>
               <input
                 type="number"
                 required
                 value={formData.settlement_target}
                 onChange={(e) => setFormData({ ...formData, settlement_target: parseFloat(e.target.value) || 0 })}
-                className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-blue-500"
+                className="w-full px-3 py-2 bg-white border border-[#E2E8F0] rounded-xl text-xs text-[#334155] focus:outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6]/20"
               />
             </div>
             <div>
-              <label className="text-xs font-semibold text-slate-300 block mb-1">Fee Plan</label>
+              <label className="text-xs font-semibold text-[#334155] block mb-1">SX Services Fee (₹) *</label>
+              <input
+                type="number"
+                required
+                min="0"
+                value={formData.sx_services_fee}
+                onChange={(e) => setFormData({ ...formData, sx_services_fee: parseFloat(e.target.value) || 0 })}
+                className="w-full px-3 py-2 bg-white border border-[#E2E8F0] rounded-xl text-xs text-[#334155] font-bold focus:outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6]/20"
+                placeholder="8000"
+              />
+            </div>
+            <div>
+              <label className="text-xs font-semibold text-[#334155] block mb-1">Fee Plan</label>
               <select
                 value={formData.fee_plan_id}
                 onChange={(e) => setFormData({ ...formData, fee_plan_id: e.target.value })}
-                className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-blue-500"
+                className="w-full px-3 py-2 bg-white border border-[#E2E8F0] rounded-xl text-xs text-[#334155] focus:outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6]/20"
               >
                 {feePlans.map((p) => (
                   <option key={p.id} value={p.id}>
@@ -351,11 +368,11 @@ export const ClientsView: React.FC = () => {
               </select>
             </div>
             <div>
-              <label className="text-xs font-semibold text-slate-300 block mb-1">Assign Advocate</label>
+              <label className="text-xs font-semibold text-[#334155] block mb-1">Assign Advocate</label>
               <select
                 value={formData.advocate_id}
                 onChange={(e) => setFormData({ ...formData, advocate_id: e.target.value })}
-                className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-blue-500"
+                className="w-full px-3 py-2 bg-white border border-[#E2E8F0] rounded-xl text-xs text-[#334155] focus:outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6]/20"
               >
                 <option value="">Select Advocate</option>
                 {advocates.map((a) => (
@@ -371,15 +388,15 @@ export const ClientsView: React.FC = () => {
             <button
               type="button"
               onClick={() => setIsCreateOpen(false)}
-              className="px-4 py-2 rounded-xl text-xs text-slate-400 hover:text-white"
+              className="px-4 py-2 rounded-xl text-xs bg-white border border-[#E2E8F0] text-[#334155] hover:bg-[#F8FAFC] transition-colors font-medium"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold shadow-lg shadow-blue-600/30"
+              className="px-5 py-2.5 rounded-xl bg-[#3B82F6] hover:bg-[#2563EB] text-white text-xs font-bold shadow-xs transition-colors"
             >
-              Onboard Client
+              Register Client Case
             </button>
           </div>
         </form>

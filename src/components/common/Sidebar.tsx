@@ -93,7 +93,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
         { id: 'lead-import-distribution', label: 'Lead Import & Distribution', icon: FileSpreadsheet },
         { id: 'clients', label: 'Clients', icon: Users },
         { id: 'agreements', label: 'Agreements', icon: FileSignature },
-        { id: 'onboarding-form', label: 'Onboarding Forms', icon: FileSpreadsheet },
       ],
     },
     {
@@ -143,23 +142,27 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   return (
     <aside
-      className={`fixed top-0 left-0 z-[500] h-screen bg-[#cadbc8] border-r border-[#b5cbb3] transition-all duration-300 flex flex-col font-sans ${collapsed ? 'w-20' : 'w-72'
+      className={`fixed top-0 left-0 z-[500] h-screen bg-[#1E293B] border-r border-[#334155] transition-all duration-300 flex flex-col font-sans ${collapsed ? 'w-20' : 'w-72'
         }`}
     >
       {/* Brand Header */}
-      <div className="h-20 flex items-center px-5 border-b border-[#b5cbb3]/60 cursor-pointer" onClick={() => onNavigate('dashboard')}>
+      <div className="h-20 flex items-center px-5 border-b border-[#334155] cursor-pointer" onClick={() => onNavigate('dashboard')}>
         {!collapsed ? (
-          <img
-            src="/logo.png"
-            alt="SettleXpert"
-            className="h-11 max-h-11 w-auto max-w-[210px] object-contain mix-blend-multiply"
-          />
+          <div className="bg-white px-3 py-1.5 rounded-xl shadow-xs inline-flex items-center">
+            <img
+              src="/logo.png"
+              alt="SettleXpert"
+              className="h-8 max-h-8 w-auto max-w-[190px] object-contain"
+            />
+          </div>
         ) : (
-          <img
-            src="/logo.png"
-            alt="SettleXpert"
-            className="h-10 w-10 object-contain mx-auto mix-blend-multiply"
-          />
+          <div className="bg-white p-1.5 rounded-xl shadow-xs mx-auto">
+            <img
+              src="/logo.png"
+              alt="SettleXpert"
+              className="h-7 w-7 object-contain"
+            />
+          </div>
         )}
       </div>
 
@@ -178,11 +181,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 key={group.id}
                 onClick={() => onNavigate(group.id)}
                 className={`w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl transition-all text-left ${currentSection === group.id
-                  ? 'bg-[#111827] text-white shadow-md'
-                  : 'text-slate-700 hover:bg-[#b8ccb6] hover:text-slate-900'
+                  ? 'bg-[#3B82F6] text-white shadow-sm'
+                  : 'text-slate-300 hover:bg-[#334155] hover:text-white'
                   }`}
               >
-                <GroupIcon className={`h-4 w-4 shrink-0 ${currentSection === group.id ? 'text-white' : 'text-slate-700'}`} />
+                <GroupIcon className={`h-4 w-4 shrink-0 ${currentSection === group.id ? 'text-white' : 'text-slate-400'}`} />
                 {!collapsed && <span>{group.label}</span>}
               </button>
             );
@@ -193,12 +196,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <button
                 onClick={() => toggleGroup(group.id)}
                 className={`w-full flex items-center justify-between px-3.5 py-2 rounded-xl transition-all text-left ${isChildActive
-                  ? 'bg-[#111827] text-white shadow-md'
-                  : 'text-slate-700 hover:bg-[#b8ccb6] hover:text-slate-900'
+                  ? 'bg-[#334155] text-white'
+                  : 'text-slate-300 hover:bg-[#334155] hover:text-white'
                   }`}
               >
                 <div className="flex items-center space-x-3">
-                  <GroupIcon className={`h-4 w-4 shrink-0 ${isChildActive ? 'text-white' : 'text-slate-700'}`} />
+                  <GroupIcon className={`h-4 w-4 shrink-0 ${isChildActive ? 'text-[#3B82F6]' : 'text-slate-400'}`} />
                   {!collapsed && <span>{group.label}</span>}
                 </div>
                 {!collapsed && (
@@ -213,7 +216,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               </button>
 
               {!collapsed && isOpen && group.children && (
-                <div className="pl-8 pr-1 py-1 space-y-1 border-l border-[#b5cbb3]/80 ml-4">
+                <div className="pl-8 pr-1 py-1 space-y-1 border-l border-[#334155] ml-4">
                   {group.children.map((child) => {
                     const ChildIcon = child.icon;
                     const isActive = currentSection === child.id;
@@ -222,8 +225,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
                         key={child.id}
                         onClick={() => onNavigate(child.id)}
                         className={`w-full flex items-center justify-between px-3 py-1.5 rounded-lg text-[11px] font-medium transition-colors text-left ${isActive
-                          ? 'bg-[#e2ede0] text-[#166534] font-bold shadow-2xs'
-                          : 'text-slate-700 hover:text-slate-900 hover:bg-[#b8ccb6]/60'
+                          ? 'bg-[#3B82F6] text-white font-bold shadow-xs'
+                          : 'text-slate-400 hover:text-white hover:bg-[#334155]'
                           }`}
                       >
                         <div className="flex items-center space-x-2">
@@ -231,7 +234,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                           <span>{child.label}</span>
                         </div>
                         {child.badge && (
-                          <span className="text-[9px] bg-amber-500/20 text-amber-800 font-bold px-1.5 py-0.2 rounded">
+                          <span className="text-[9px] bg-blue-500/20 text-blue-200 font-bold px-1.5 py-0.2 rounded">
                             {child.badge}
                           </span>
                         )}
@@ -247,13 +250,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
       {/* Footer / System Status */}
       {!collapsed && (
-        <div className="p-3 border-t border-[#b5cbb3]/60 bg-[#cadbc8]">
-          <div className="flex items-center justify-between text-xs text-slate-700 font-semibold">
+        <div className="p-3 border-t border-[#334155] bg-[#1E293B]">
+          <div className="flex items-center justify-between text-xs text-slate-300 font-semibold">
             <span className="flex items-center space-x-1.5">
-              <span className="h-2 w-2 rounded-full bg-[#16a34a]" />
+              <span className="h-2 w-2 rounded-full bg-[#22C55E]" />
               <span>Admin Active</span>
             </span>
-            <span className="text-[10px] font-mono text-slate-600">v1.0.0</span>
+            <span className="text-[10px] font-mono text-slate-400">v1.0.0</span>
           </div>
         </div>
       )}

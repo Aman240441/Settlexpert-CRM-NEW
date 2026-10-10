@@ -295,24 +295,24 @@ export const ClientDetailsUnifiedView: React.FC<ClientDetailsUnifiedViewProps> =
         </div>
       </div>
 
-      {/* Light Green Client Registration Banner (Matching Live Reference Screenshot) */}
-      <div className="rounded-lg bg-[#bbf7d0] px-5 py-3 border border-[#86efac]/80 shadow-2xs flex items-center justify-between">
+      {/* Client Registration Banner */}
+      <div className="rounded-2xl bg-white px-5 py-3.5 border border-[#E2E8F0] shadow-xs flex items-center justify-between">
         <div>
-          <div className="text-xs font-bold text-[#14532d]">Client Registration</div>
-          <div className="text-sm font-semibold text-[#166534] mt-0.5">
-            {clientId} -- {clientName}
+          <div className="text-xs font-bold text-[#64748B] uppercase tracking-wider">Client Registration</div>
+          <div className="text-base font-black text-[#1E293B] mt-0.5">
+            {clientId} — {clientName}
           </div>
         </div>
         <div className="text-right">
-          <span className="text-[10px] font-bold text-emerald-800 uppercase tracking-wider block">Case Status</span>
-          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-white text-emerald-800 border border-emerald-300">
+          <span className="text-[10px] font-bold text-[#64748B] uppercase tracking-wider block mb-1">Case Status</span>
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-lg text-xs font-bold bg-[#F0FDF4] text-[#16A34A] border border-[#BBF7D0]">
             {caseStatus.toUpperCase()}
           </span>
         </div>
       </div>
 
-      {/* Tabs Navigation Bar (Scrollable, Active in Solid Blue) */}
-      <div className="bg-white rounded-xl border border-gray-200 p-2 shadow-xs">
+      {/* Tabs Navigation Bar (Selected Tab: #EFF6FF / #2563EB) */}
+      <div className="bg-white rounded-2xl border border-[#E2E8F0] p-1.5 shadow-xs">
         <div className="flex flex-wrap items-center gap-1.5">
           {allTabs.map((tab) => {
             const isActive = activeTab === tab.id;
@@ -320,10 +320,10 @@ export const ClientDetailsUnifiedView: React.FC<ClientDetailsUnifiedViewProps> =
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all whitespace-nowrap cursor-pointer ${
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap cursor-pointer ${
                   isActive
-                    ? 'bg-[#3b82f6] text-white font-bold shadow-xs'
-                    : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                    ? 'bg-[#EFF6FF] text-[#2563EB] shadow-xs'
+                    : 'text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#1E293B]'
                 }`}
               >
                 {tab.label}
@@ -507,7 +507,7 @@ export const ClientDetailsUnifiedView: React.FC<ClientDetailsUnifiedViewProps> =
               <p className="text-slate-500 text-[11px]">Installment ledger for legal protection & debt settlement services.</p>
             </div>
             <div className="font-mono font-bold text-slate-900">
-              Monthly Fee: <span className="text-blue-700">₹8,000 / Month</span>
+              SX Services Fee: <span className="text-blue-700">₹{(client?.sx_services_fee || client?.sx_fee || client?.monthly_fee || 8000).toLocaleString('en-IN')} / Month</span>
             </div>
           </div>
 
@@ -887,7 +887,7 @@ export const ClientDetailsUnifiedView: React.FC<ClientDetailsUnifiedViewProps> =
               <div><span className="text-slate-400 font-bold uppercase text-[10px] block">Converted By Consultant:</span> <strong className="text-slate-900">{client.employee_name || 'Dhruv Singh'}</strong></div>
               <div><span className="text-slate-400 font-bold uppercase text-[10px] block">Lead Conversion Date:</span> 17 Feb 2025</div>
               <div><span className="text-slate-400 font-bold uppercase text-[10px] block">Lead Origin:</span> Direct Web Intake Form</div>
-              <div><span className="text-slate-400 font-bold uppercase text-[10px] block">Agreed Retainer Fee:</span> ₹48,000 (6 Months @ ₹8,000/mo)</div>
+              <div><span className="text-slate-400 font-bold uppercase text-[10px] block">Agreed SX Services Fee:</span> ₹48,000 (6 Months @ ₹8,000/mo)</div>
             </div>
             <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
               <span className="text-slate-400 font-bold uppercase text-[10px] block">Consultant Handover Note:</span>

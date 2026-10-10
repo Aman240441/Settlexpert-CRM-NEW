@@ -328,11 +328,11 @@ export const CreateStaffModal: React.FC<CreateStaffModalProps> = ({
                 onClick={() => setActiveTab(tab.id as any)}
                 className={`flex items-center space-x-2 border-b-2 px-4 py-3 text-xs font-bold transition-all whitespace-nowrap ${
                   isActive
-                    ? 'border-blue-600 text-blue-700 bg-white shadow-xs'
-                    : 'border-transparent text-slate-600 hover:text-slate-900 hover:bg-slate-100/50'
+                    ? 'border-[#3B82F6] text-[#2563EB] bg-[#EFF6FF]'
+                    : 'border-transparent text-[#64748B] hover:text-[#1E293B] hover:bg-[#F8FAFC]'
                 }`}
               >
-                <Icon className={`h-4 w-4 ${isActive ? 'text-blue-600' : 'text-slate-400'}`} />
+                <Icon className={`h-4 w-4 ${isActive ? 'text-[#3B82F6]' : 'text-[#94A3B8]'}`} />
                 <span>{tab.label}</span>
               </button>
             );

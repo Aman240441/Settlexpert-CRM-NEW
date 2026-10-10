@@ -4,7 +4,13 @@
 
 @layer base {
   body {
-    @apply bg-slate-950 text-slate-100 font-sans min-h-screen antialiased;
+    background-color: #F8FAFC;
+    color: #334155;
+    @apply font-sans min-h-screen antialiased;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    color: #1E293B;
   }
 
   /* Custom Clean Scrollbar */
@@ -14,33 +20,82 @@
   }
 
   ::-webkit-scrollbar-track {
-    background: #090e17;
+    background: #F1F5F9;
   }
 
   ::-webkit-scrollbar-thumb {
-    background: #1e293b;
+    background: #CBD5E1;
     border-radius: 4px;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background: #334155;
+    background: #94A3B8;
   }
 }
 
+/* Global Clean Enterprise Styles */
+.crm-card {
+  background-color: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 12px;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
+}
+
+.crm-input {
+  background-color: #FFFFFF !important;
+  border: 1px solid #E2E8F0 !important;
+  color: #334155 !important;
+  border-radius: 10px;
+}
+
+.crm-input::placeholder {
+  color: #94A3B8 !important;
+}
+
+.crm-input:focus {
+  border-color: #3B82F6 !important;
+  outline: none !important;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15) !important;
+}
+
+.crm-btn-primary {
+  background-color: #3B82F6;
+  color: #FFFFFF;
+  transition: all 0.15s ease-in-out;
+}
+
+.crm-btn-primary:hover {
+  background-color: #2563EB;
+}
+
+.crm-btn-secondary {
+  background-color: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  color: #334155;
+  transition: all 0.15s ease-in-out;
+}
+
+.crm-btn-secondary:hover {
+  background-color: #F8FAFC;
+}
+
+.crm-tab-active {
+  background-color: #EFF6FF !important;
+  color: #2563EB !important;
+}
+
 .glass-panel {
-  background: rgba(15, 23, 42, 0.75);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
 }
 
 .glass-card {
-  background: rgba(30, 41, 59, 0.5);
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
 }
 
 .glow-blue {
-  box-shadow: 0 0 25px -5px rgba(14, 140, 233, 0.25);
+  box-shadow: 0 1px 3px 0 rgba(59, 130, 246, 0.15);
 }
 
 /* Custom animation utils */

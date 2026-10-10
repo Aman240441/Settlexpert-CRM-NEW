@@ -319,7 +319,7 @@ export const ManagerClientsView: React.FC<ManagerClientsViewProps> = ({ managerT
                 <th className="py-3 px-3">Client Name / City</th>
                 <th className="py-3 px-3">Assigned Staff</th>
                 <th className="py-3 px-3">Assigned Advocate</th>
-                <th className="py-3 px-3">SX Fee</th>
+                <th className="py-3 px-3">SX Services Fee</th>
                 <th className="py-3 px-3">Received</th>
                 <th className="py-3 px-3">Pending</th>
                 <th className="py-3 px-3">Status</th>
@@ -740,7 +740,7 @@ export const ManagerClientsView: React.FC<ManagerClientsViewProps> = ({ managerT
                 </span>
               </div>
               <div className="p-3 rounded-xl bg-gray-50 border border-gray-200">
-                <span className="text-slate-500 text-[10px] block uppercase font-bold">Monthly SX Fee</span>
+                <span className="text-slate-500 text-[10px] block uppercase font-bold">SX Services Fee</span>
                 <span className="text-sm font-black text-slate-900">
                   {formatCurrency(selectedClient360.client?.monthly_fee || 8000)} / mo
                 </span>

@@ -1,13 +1,19 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Printer,
   Copy,
   Check,
   ExternalLink,
+  Edit2,
+  Save,
+  X,
+  User,
+  Wallet,
+  AlertCircle,
   ShieldCheck,
-  Phone,
-  Mail
+  Loader2
 } from 'lucide-react';
+import { api } from '../../services/api';
 
 interface ClientOnboardingFormViewProps {
   client: any;
@@ -19,14 +25,23 @@ interface ClientOnboardingFormViewProps {
 }
 
 export const ClientOnboardingFormView: React.FC<ClientOnboardingFormViewProps> = ({
-  client,
+  client: initialClient,
   lenders = [],
   agreements = [],
   payments = [],
   monthlyPaymentData,
   onOpenAgreement,
 }) => {
+  const [client, setClient] = useState<any>(initialClient);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [formData, setFormData] = useState<any>({});
+
+  useEffect(() => {
+    setClient(initialClient);
+    setFormData(initialClient);
+  }, [initialClient]);
 
   if (!client) {
     return (
@@ -47,339 +62,245 @@ export const ClientOnboardingFormView: React.FC<ClientOnboardingFormViewProps> =
     window.print();
   };
 
-  const actionDateStr = client.created_at
-    ? new Date(client.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
-    : '17 Feb 2025';
+  const handleChange = (field: string, value: any) => {
+    setFormData((prev: any) => ({ ...prev, [field]: value }));
+  };
 
-  const attachedLenders = (lenders && lenders.length > 0) ? lenders : (client.lenders || []);
-  const lendersCount = attachedLenders.length > 0 ? attachedLenders.length : (client.lenders_count || 4);
-  const totalDebt = client.total_debt || 450000;
-  const monthlyIncome = client.monthly_income || 35000;
-  const previousEmi = client.monthly_emi || client.total_emi || 20000;
-  const emiRatio = client.emi_ratio || Math.round((previousEmi / (monthlyIncome || 1)) * 100);
+  const handleSave = async () => {
+    try {
+      setIsSaving(true);
+      await api.updateCRMClient(client.id, formData);
+      setClient({ ...client, ...formData });
+      setIsEditing(false);
+    } catch (error) {
+      console.error('Failed to update client', error);
+      alert('Failed to save changes. Please try again.');
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
-  // Exact 35 fields from the reference screenshot
-  const onboardingFields = [
+  const handleCancel = () => {
+    setFormData(client);
+    setIsEditing(false);
+  };
+
+  const totalDebt = formData.total_debt || client.total_debt || 450000;
+  const monthlyIncome = formData.monthly_income || client.monthly_income || 35000;
+  const previousEmi = formData.monthly_emi || formData.total_emi || client.monthly_emi || client.total_emi || 20000;
+  const emiRatio = formData.emi_ratio || client.emi_ratio || Math.round((previousEmi / (monthlyIncome || 1)) * 100);
+
+  const sections = [
     {
-      sno: 1,
-      heading: 'Client Name',
-      value: client.name || 'Farhan khan',
-      actionOn: actionDateStr,
+      id: 'personal',
+      title: 'Personal Details',
+      icon: <User className="h-4 w-4 text-blue-600" />,
+      fields: [
+        { label: 'Client Name', key: 'name', type: 'text' },
+        { label: 'Client Email', key: 'email', type: 'email' },
+        { label: 'Client Phone', key: 'phone', type: 'tel' },
+        { label: 'Occupation', key: 'occupation', type: 'text' },
+        { label: 'Marital Status', key: 'marital_status', type: 'text' },
+        { label: 'Living With', key: 'living_with', type: 'text' },
+        { label: 'Accommodation', key: 'accommodation', type: 'text' },
+        { label: 'Spouse Phone', key: 'spouse_phone', type: 'tel' },
+      ],
     },
     {
-      sno: 2,
-      heading: 'Client Email',
-      value: client.email || 'Farhan.khan313@gmail.com',
-      actionOn: actionDateStr,
-      isEmail: true,
+      id: 'financial',
+      title: 'Financial Details',
+      icon: <Wallet className="h-4 w-4 text-emerald-600" />,
+      fields: [
+        { label: 'Total Loan Amount', key: 'total_debt', type: 'number', default: totalDebt },
+        { label: 'SX Services Fee', key: 'sx_services_fee', type: 'number', default: client.sx_services_fee || client.sx_fee || 8000 },
+        { label: 'Number of Lenders', key: 'lenders_count', type: 'number', default: lenders.length > 0 ? lenders.length : 4 },
+        { label: 'Monthly Income', key: 'monthly_income', type: 'number', default: monthlyIncome },
+        { label: 'Salary Bank', key: 'salary_bank', type: 'text' },
+        { label: 'Salary Date', key: 'salary_date', type: 'number' },
+        { label: 'Auto Debit Lenders', key: 'auto_debit_lenders', type: 'number' },
+        { label: 'Blank Cheque Lenders', key: 'blank_cheque_lenders', type: 'number' },
+        { label: 'Spouse Monthly Income', key: 'spouse_monthly_income', type: 'number' },
+        { label: 'Parents Monthly Income', key: 'parents_monthly_income', type: 'number' },
+        { label: 'Other Sources Income', key: 'other_sources_income', type: 'number' },
+        { label: 'Family Monthly Income', key: 'family_monthly_income', type: 'number' },
+        { label: 'Family Monthly Expenses', key: 'family_monthly_expenses', type: 'number' },
+        { label: 'Previous Monthly EMI', key: 'monthly_emi', type: 'number', default: previousEmi },
+        { label: 'EMI to Income Ratio (%)', key: 'emi_ratio', type: 'number', default: emiRatio },
+        { label: 'How were EMIs managed?', key: 'how_emis_managed', type: 'text' },
+      ],
     },
     {
-      sno: 3,
-      heading: 'Client phone number',
-      value: client.phone || '919845329118',
-      actionOn: actionDateStr,
-      isPhone: true,
+      id: 'hardship',
+      title: 'Hardship & Reasons',
+      icon: <AlertCircle className="h-4 w-4 text-rose-600" />,
+      fields: [
+        { label: 'Reasons for taking loan', key: 'reasons_taking_loan', type: 'textarea' },
+        { label: 'Reasons for not paying', key: 'reasons_not_paying', type: 'textarea' },
+        { label: 'Source of settlement funds', key: 'source_settlement_funds', type: 'textarea' },
+      ],
     },
     {
-      sno: 4,
-      heading: 'Occupation',
-      value: client.occupation || client.employment_type || 'Private company employee',
-      actionOn: actionDateStr,
-    },
-    {
-      sno: 5,
-      heading: 'Married?',
-      value: client.marital_status || 'Married with kids',
-      actionOn: actionDateStr,
-    },
-    {
-      sno: 6,
-      heading: 'Living with?',
-      value: client.living_with || 'With spouse (& kids)',
-      actionOn: actionDateStr,
-    },
-    {
-      sno: 7,
-      heading: 'Accomodation',
-      value: client.accommodation || 'Rented (not gated)',
-      actionOn: actionDateStr,
-    },
-    {
-      sno: 8,
-      heading: 'Spouse phone number',
-      value: client.spouse_phone || client.alt_phone || '+918618358812',
-      actionOn: actionDateStr,
-      isPhone: true,
-    },
-    {
-      sno: 9,
-      heading: 'Loan amount',
-      value: String(totalDebt),
-      actionOn: actionDateStr,
-    },
-    {
-      sno: 10,
-      heading: 'Number of lenders',
-      value: String(lendersCount),
-      actionOn: actionDateStr,
-    },
-    {
-      sno: 11,
-      heading: "Client's monthly income",
-      value: String(monthlyIncome),
-      actionOn: actionDateStr,
-    },
-    {
-      sno: 12,
-      heading: 'Salary account in which bank?',
-      value: client.salary_bank || client.primary_bank || 'icici bank',
-      actionOn: actionDateStr,
-    },
-    {
-      sno: 13,
-      heading: 'Salary date',
-      value: String(client.salary_date || '5'),
-      actionOn: actionDateStr,
-    },
-    {
-      sno: 14,
-      heading: 'Lenders that auto debit in salary account (if any)',
-      value: String(client.auto_debit_lenders || '0'),
-      actionOn: actionDateStr,
-    },
-    {
-      sno: 15,
-      heading: 'Lenders to whom blank cheques given (if any)',
-      value: String(client.blank_cheque_lenders || '0'),
-      actionOn: actionDateStr,
-    },
-    {
-      sno: 16,
-      heading: 'Spouse monthly income',
-      value: String(client.spouse_monthly_income || '0'),
-      actionOn: actionDateStr,
-    },
-    {
-      sno: 17,
-      heading: 'Parents monthly income',
-      value: String(client.parents_monthly_income || '0'),
-      actionOn: actionDateStr,
-    },
-    {
-      sno: 18,
-      heading: 'Other sources monthly income',
-      value: String(client.other_sources_income || '0'),
-      actionOn: actionDateStr,
-    },
-    {
-      sno: 19,
-      heading: 'Family monthly income',
-      value: String(client.family_monthly_income || monthlyIncome),
-      actionOn: actionDateStr,
-    },
-    {
-      sno: 20,
-      heading: 'Family monthly expenses',
-      value: String(client.family_monthly_expenses || '30000'),
-      actionOn: actionDateStr,
-    },
-    {
-      sno: 21,
-      heading: 'Monthly EMI (that was being paid earlier)',
-      value: String(previousEmi),
-      actionOn: actionDateStr,
-    },
-    {
-      sno: 22,
-      heading: 'EMI to Income ratio (%)',
-      value: String(emiRatio),
-      actionOn: actionDateStr,
-    },
-    {
-      sno: 23,
-      heading: 'How were EMIs managed earlier?',
-      value: client.how_emis_managed || 'family and friends',
-      actionOn: actionDateStr,
-    },
-    {
-      sno: 24,
-      heading: 'Reasons for taking loan',
-      value: client.reasons_taking_loan || 'family problems',
-      actionOn: actionDateStr,
-    },
-    {
-      sno: 25,
-      heading: 'Reasons for not being able to pay back loans',
-      value: client.reasons_not_paying || client.hardship_reason || 'emi is not handle by salary',
-      actionOn: actionDateStr,
-    },
-    {
-      sno: 26,
-      heading: 'Source of settlement funds',
-      value: client.source_settlement_funds || 'family and friends',
-      actionOn: actionDateStr,
-    },
-    {
-      sno: 27,
-      heading: 'Points explained in onboarding call',
-      value: client.onboarding_points_explained || '"Agreement"',
-      actionOn: actionDateStr,
-    },
-    {
-      sno: 28,
-      heading: 'Has the client agreed to subscribe to Truecaller Premium?',
-      value: client.truecaller_subscribed || 'Client has agreed to subscribe to Truecaller Premium',
-      actionOn: actionDateStr,
-    },
-    {
-      sno: 29,
-      heading: 'Has the client agreed to install CCTV camera at home?',
-      value: client.cctv_agreed || 'Client has agreed to install CCTV camera',
-      actionOn: actionDateStr,
-    },
-    {
-      sno: 30,
-      heading: 'Is spouse aware of loans/settlement proceedings?',
-      value: client.spouse_aware || 'Yes',
-      actionOn: actionDateStr,
-    },
-    {
-      sno: 31,
-      heading: 'Are parents aware of loans/settlement proceedings?',
-      value: client.parents_aware || 'Yes',
-      actionOn: actionDateStr,
-    },
-    {
-      sno: 32,
-      heading: 'Likelihood of early drop',
-      value: client.early_drop_likelihood || 'Low',
-      actionOn: actionDateStr,
-    },
-    {
-      sno: 33,
-      heading: 'Any other comments',
-      value: client.comments || client.notes || 's',
-      actionOn: actionDateStr,
-    },
-    {
-      sno: 34,
-      heading: 'Advocate Name',
-      value: client.advocate_name || 'Subham Singh',
-      actionOn: actionDateStr,
-    },
-    {
-      sno: 35,
-      heading: 'Advocate email id',
-      value: client.advocate_email || 'subham@expertpanel.org',
-      actionOn: actionDateStr,
-      isEmail: true,
+      id: 'legal',
+      title: 'Legal & Compliance',
+      icon: <ShieldCheck className="h-4 w-4 text-indigo-600" />,
+      fields: [
+        { label: 'Points explained in call', key: 'onboarding_points_explained', type: 'textarea' },
+        { label: 'Truecaller Premium Subscribed?', key: 'truecaller_subscribed', type: 'select', options: ['Yes', 'No', 'Client has agreed to subscribe to Truecaller Premium'] },
+        { label: 'CCTV Camera Agreed?', key: 'cctv_agreed', type: 'select', options: ['Yes', 'No', 'Client has agreed to install CCTV camera'] },
+        { label: 'Spouse Aware?', key: 'spouse_aware', type: 'select', options: ['Yes', 'No'] },
+        { label: 'Parents Aware?', key: 'parents_aware', type: 'select', options: ['Yes', 'No'] },
+        { label: 'Likelihood of early drop', key: 'early_drop_likelihood', type: 'select', options: ['Low', 'Medium', 'High'] },
+        { label: 'Advocate Name', key: 'advocate_name', type: 'text' },
+        { label: 'Advocate Email', key: 'advocate_email', type: 'email' },
+        { label: 'Additional Comments', key: 'comments', type: 'textarea' },
+      ],
     },
   ];
 
   return (
-    <div className="space-y-4 font-sans text-slate-800 pb-16 animate-fade-in min-h-0 h-auto">
-      {/* Action Bar (Print / Agreement) */}
-      <div className="flex items-center justify-between">
-        <div className="text-xs text-slate-500 font-medium">
-          Total Onboarding Questions: <strong className="text-slate-800">{onboardingFields.length} Recorded Fields</strong>
+    <div className="space-y-6 font-sans text-slate-800 pb-16 animate-fade-in min-h-0 h-auto">
+      {/* Header Actions */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-gray-200 shadow-xs">
+        <div>
+          <h2 className="text-lg font-black text-slate-900 tracking-tight flex items-center space-x-2">
+            <span>Onboarding Dossier</span>
+            {isEditing && <span className="px-2 py-0.5 rounded bg-blue-100 text-blue-700 text-xs font-bold uppercase tracking-wider">Edit Mode</span>}
+          </h2>
+          <p className="text-xs text-slate-500 mt-1">
+            Complete details gathered during the client onboarding process.
+          </p>
         </div>
-        <div className="flex items-center space-x-2">
-          <button
-            onClick={handlePrint}
-            className="px-3 py-1.5 bg-white hover:bg-gray-50 border border-gray-300 text-slate-700 rounded-lg text-xs font-bold flex items-center space-x-1.5 shadow-2xs transition-colors cursor-pointer"
-            title="Print Official Onboarding Form"
-          >
-            <Printer className="h-3.5 w-3.5 text-slate-600" />
-            <span>Print Form</span>
-          </button>
-          {onOpenAgreement && (
-            <button
-              onClick={() => onOpenAgreement(client)}
-              className="px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold flex items-center space-x-1.5 shadow-xs transition-colors cursor-pointer"
-            >
-              <ExternalLink className="h-3.5 w-3.5" />
-              <span>Agreement</span>
-            </button>
+
+        <div className="flex items-center space-x-2 shrink-0">
+          {!isEditing ? (
+            <>
+              <button
+                onClick={() => setIsEditing(true)}
+                className="px-3.5 py-2 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 rounded-xl text-xs font-bold flex items-center space-x-1.5 shadow-sm transition-all cursor-pointer"
+              >
+                <Edit2 className="h-3.5 w-3.5" />
+                <span>Edit Form</span>
+              </button>
+              <button
+                onClick={handlePrint}
+                className="px-3.5 py-2 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 rounded-xl text-xs font-bold flex items-center space-x-1.5 shadow-sm transition-all cursor-pointer"
+                title="Print Official Onboarding Form"
+              >
+                <Printer className="h-3.5 w-3.5" />
+                <span>Print</span>
+              </button>
+              {onOpenAgreement && (
+                <button
+                  onClick={() => onOpenAgreement(client)}
+                  className="px-3.5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold flex items-center space-x-1.5 shadow-sm transition-colors cursor-pointer"
+                >
+                  <ExternalLink className="h-3.5 w-3.5" />
+                  <span>Agreement</span>
+                </button>
+              )}
+            </>
+          ) : (
+            <>
+              <button
+                onClick={handleCancel}
+                disabled={isSaving}
+                className="px-3.5 py-2 bg-white hover:bg-rose-50 border border-slate-200 hover:border-rose-200 hover:text-rose-600 text-slate-600 rounded-xl text-xs font-bold flex items-center space-x-1.5 shadow-sm transition-all cursor-pointer disabled:opacity-50"
+              >
+                <X className="h-3.5 w-3.5" />
+                <span>Cancel</span>
+              </button>
+              <button
+                onClick={handleSave}
+                disabled={isSaving}
+                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold flex items-center space-x-1.5 shadow-sm transition-colors cursor-pointer disabled:opacity-70"
+              >
+                {isSaving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}
+                <span>{isSaving ? 'Saving...' : 'Save Changes'}</span>
+              </button>
+            </>
           )}
         </div>
       </div>
 
-      {/* Structured Table: S.No. | Heading | Value | Action On */}
-      {/* NO fixed-height container, expands automatically */}
-      <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-xs">
-        <div className="w-full overflow-x-auto min-h-0 h-auto">
-          <table className="w-full text-left text-xs border-collapse">
-            <thead className="bg-white text-slate-800 border-b border-gray-200 font-bold">
-              <tr>
-                <th className="py-3.5 px-4 w-16 text-slate-700">S.No.</th>
-                <th className="py-3.5 px-4 w-2/5 min-w-[240px] text-slate-700">Heading</th>
-                <th className="py-3.5 px-4 w-2/5 min-w-[280px] text-slate-700">Value</th>
-                <th className="py-3.5 px-4 min-w-[140px] text-right text-slate-700">Action On</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100 text-slate-800">
-              {onboardingFields.map((field, idx) => {
-                const isEven = idx % 2 === 1;
+      {/* Sections Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {sections.map((section) => (
+          <div key={section.id} className={`bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden flex flex-col ${section.fields.some(f => f.type === 'textarea') ? 'lg:col-span-2' : ''}`}>
+            <div className="bg-slate-50 border-b border-gray-100 px-5 py-3.5 flex items-center space-x-2.5">
+              <div className={`p-1.5 rounded-lg bg-white shadow-xs border border-gray-100`}>
+                {section.icon}
+              </div>
+              <h3 className="font-bold text-slate-800 text-sm">{section.title}</h3>
+            </div>
+            
+            <div className={`p-5 grid gap-5 ${section.fields.some(f => f.type === 'textarea') ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-1 sm:grid-cols-2'}`}>
+              {section.fields.map((field) => {
+                const val = formData[field.key] !== undefined ? formData[field.key] : (field.default !== undefined ? field.default : '');
+                
                 return (
-                  <tr
-                    key={field.sno}
-                    className={`transition-colors hover:bg-blue-50/50 group ${isEven ? 'bg-[#f9fafb]' : 'bg-white'}`}
-                  >
-                    {/* 1. S.No. */}
-                    <td className="py-3 px-4 font-mono text-slate-500 font-medium align-top text-xs">
-                      {field.sno}
-                    </td>
-
-                    {/* 2. Heading */}
-                    <td className="py-3 px-4 align-top font-semibold text-slate-800 text-xs break-words">
-                      {field.heading}
-                    </td>
-
-                    {/* 3. Value (Wraps properly, no truncation) */}
-                    <td className="py-3 px-4 align-top text-slate-700 text-xs break-words whitespace-normal leading-relaxed">
-                      {field.isEmail ? (
-                        <a
-                          href={`mailto:${field.value}`}
-                          className="text-blue-600 hover:underline inline-flex items-center space-x-1"
-                        >
-                          <span>{field.value}</span>
-                        </a>
-                      ) : field.isPhone ? (
-                        <a
-                          href={`tel:${field.value}`}
-                          className="font-mono text-slate-800 hover:text-blue-600 inline-flex items-center space-x-1 font-semibold"
-                        >
-                          <span>{field.value}</span>
-                        </a>
-                      ) : (
-                        <span>{field.value}</span>
-                      )}
-                    </td>
-
-                    {/* 4. Action On */}
-                    <td className="py-3 px-4 align-top text-right whitespace-nowrap text-xs text-slate-600 font-mono">
-                      <div className="flex items-center justify-end space-x-1.5">
-                        <span>{field.actionOn}</span>
-                        <button
-                          type="button"
-                          onClick={() => handleCopy(field.value, `field-${field.sno}`)}
-                          className="opacity-0 group-hover:opacity-100 text-slate-400 hover:text-blue-600 p-0.5 transition-all cursor-pointer"
-                          title="Copy value"
-                        >
-                          {copiedKey === `field-${field.sno}` ? (
-                            <Check className="h-3 w-3 text-emerald-600" />
-                          ) : (
-                            <Copy className="h-3 w-3" />
-                          )}
-                        </button>
+                  <div key={field.key} className={`group ${field.type === 'textarea' ? 'col-span-1 md:col-span-2' : ''}`}>
+                    <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">
+                      {field.label}
+                    </label>
+                    
+                    {!isEditing ? (
+                      <div className="flex items-start justify-between p-2.5 -mx-2.5 rounded-lg hover:bg-slate-50 transition-colors">
+                        <span className="text-sm font-medium text-slate-900 break-words">
+                          {val || <span className="text-slate-300 font-normal italic">Not provided</span>}
+                        </span>
+                        {val && val !== '—' && (
+                          <button
+                            type="button"
+                            onClick={() => handleCopy(String(val), field.key)}
+                            className="opacity-0 group-hover:opacity-100 text-slate-400 hover:text-blue-600 p-1 transition-all cursor-pointer shrink-0"
+                            title="Copy"
+                          >
+                            {copiedKey === field.key ? (
+                              <Check className="h-3.5 w-3.5 text-emerald-600" />
+                            ) : (
+                              <Copy className="h-3.5 w-3.5" />
+                            )}
+                          </button>
+                        )}
                       </div>
-                    </td>
-                  </tr>
+                    ) : (
+                      <div className="relative">
+                        {field.type === 'textarea' ? (
+                          <textarea
+                            value={val}
+                            onChange={(e) => handleChange(field.key, e.target.value)}
+                            rows={3}
+                            className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none shadow-xs"
+                            placeholder={`Enter ${field.label.toLowerCase()}`}
+                          />
+                        ) : field.type === 'select' ? (
+                          <select
+                            value={val}
+                            onChange={(e) => handleChange(field.key, e.target.value)}
+                            className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all shadow-xs appearance-none"
+                          >
+                            <option value="">Select option...</option>
+                            {field.options?.map(opt => (
+                              <option key={opt} value={opt}>{opt}</option>
+                            ))}
+                          </select>
+                        ) : (
+                          <input
+                            type={field.type}
+                            value={val}
+                            onChange={(e) => handleChange(field.key, field.type === 'number' ? Number(e.target.value) : e.target.value)}
+                            className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all shadow-xs"
+                            placeholder={`Enter ${field.label.toLowerCase()}`}
+                          />
+                        )}
+                      </div>
+                    )}
+                  </div>
                 );
               })}
-            </tbody>
-          </table>
-        </div>
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );

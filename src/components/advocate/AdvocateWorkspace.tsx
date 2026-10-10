@@ -63,26 +63,30 @@ export const AdvocateWorkspace: React.FC<AdvocateWorkspaceProps> = ({ onSwitchTo
   };
 
   return (
-    <div className="min-h-screen bg-[#f3f4f6] text-slate-800 flex font-sans antialiased">
-      {/* Sidebar - Matching Signature Sage Green CRM Theme */}
+    <div className="min-h-screen bg-[#F8FAFC] text-[#334155] flex font-sans antialiased">
+      {/* Sidebar */}
       <aside
-        className={`bg-[#cadbc8] border-r border-[#b5cbb3] transition-all duration-300 flex flex-col shrink-0 z-[500] ${sidebarOpen ? 'w-64' : 'w-20'
+        className={`bg-[#1E293B] border-r border-[#334155] transition-all duration-300 flex flex-col shrink-0 z-[500] ${sidebarOpen ? 'w-64' : 'w-20'
           }`}
       >
         {/* Top Logo */}
-        <div className="h-20 flex items-center px-5 border-b border-[#b5cbb3]/60">
+        <div className="h-20 flex items-center px-5 border-b border-[#334155]">
           {sidebarOpen ? (
-            <img
-              src="/logo.png"
-              alt="SettleXpert"
-              className="h-11 max-h-11 w-auto max-w-[210px] object-contain mix-blend-multiply"
-            />
+            <div className="bg-white px-3 py-1.5 rounded-xl shadow-xs inline-flex items-center">
+              <img
+                src="/logo.png"
+                alt="SettleXpert"
+                className="h-8 max-h-8 w-auto max-w-[190px] object-contain"
+              />
+            </div>
           ) : (
-            <img
-              src="/logo.png"
-              alt="SettleXpert"
-              className="h-10 w-10 object-contain mx-auto mix-blend-multiply"
-            />
+            <div className="bg-white p-1.5 rounded-xl shadow-xs mx-auto">
+              <img
+                src="/logo.png"
+                alt="SettleXpert"
+                className="h-7 w-7 object-contain"
+              />
+            </div>
           )}
         </div>
 
@@ -92,8 +96,8 @@ export const AdvocateWorkspace: React.FC<AdvocateWorkspaceProps> = ({ onSwitchTo
           <button
             onClick={() => setActiveTab('dashboard')}
             className={`w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl transition-all ${activeTab === 'dashboard'
-                ? 'bg-[#111827] text-white shadow-md'
-                : 'text-slate-700 hover:bg-[#b8ccb6] hover:text-slate-900'
+                ? 'bg-[#3B82F6] text-white shadow-sm'
+                : 'text-slate-300 hover:bg-[#334155] hover:text-white'
               }`}
           >
             <Gauge className="h-4 w-4 shrink-0" />
@@ -108,8 +112,8 @@ export const AdvocateWorkspace: React.FC<AdvocateWorkspaceProps> = ({ onSwitchTo
                 setActiveTab('cases');
               }}
               className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl transition-all ${activeTab === 'cases'
-                  ? 'bg-[#111827] text-white shadow-md'
-                  : 'text-slate-700 hover:bg-[#b8ccb6] hover:text-slate-900'
+                  ? 'bg-[#334155] text-white'
+                  : 'text-slate-300 hover:bg-[#334155] hover:text-white'
                 }`}
             >
               <div className="flex items-center space-x-3">
@@ -123,15 +127,15 @@ export const AdvocateWorkspace: React.FC<AdvocateWorkspaceProps> = ({ onSwitchTo
               )}
             </button>
             {sidebarOpen && casesOpen && (
-              <div className="pl-9 pr-2 py-1 space-y-1">
+              <div className="pl-8 pr-1 py-1 space-y-1 border-l border-[#334155] ml-4">
                 <button
                   onClick={() => {
                     setCaseFilter('active');
                     setActiveTab('cases');
                   }}
                   className={`w-full text-left py-1.5 px-3 rounded-lg text-[11px] font-medium transition-all ${activeTab === 'cases' && caseFilter === 'active'
-                      ? 'bg-[#e2ede0] text-[#166534] font-bold'
-                      : 'text-slate-600 hover:text-slate-900'
+                      ? 'bg-[#3B82F6] text-white font-bold shadow-xs'
+                      : 'text-slate-400 hover:text-white hover:bg-[#334155]'
                     }`}
                 >
                   Active Cases
@@ -142,8 +146,8 @@ export const AdvocateWorkspace: React.FC<AdvocateWorkspaceProps> = ({ onSwitchTo
                     setActiveTab('cases');
                   }}
                   className={`w-full text-left py-1.5 px-3 rounded-lg text-[11px] font-medium transition-all ${activeTab === 'cases' && caseFilter === 'closed'
-                      ? 'bg-[#e2ede0] text-[#166534] font-bold'
-                      : 'text-slate-600 hover:text-slate-900'
+                      ? 'bg-[#3B82F6] text-white font-bold shadow-xs'
+                      : 'text-slate-400 hover:text-white hover:bg-[#334155]'
                     }`}
                 >
                   Closed / Dropped
@@ -157,8 +161,8 @@ export const AdvocateWorkspace: React.FC<AdvocateWorkspaceProps> = ({ onSwitchTo
             onClick={() => setActiveTab('legal_notices')}
             className={`w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl transition-all ${
               activeTab === 'legal_notices'
-                ? 'bg-[#111827] text-white shadow-md'
-                : 'text-slate-700 hover:bg-[#b8ccb6] hover:text-slate-900'
+                ? 'bg-[#3B82F6] text-white shadow-sm'
+                : 'text-slate-300 hover:bg-[#334155] hover:text-white'
             }`}
           >
             <FileSignature className="h-4 w-4 shrink-0" />
@@ -170,8 +174,8 @@ export const AdvocateWorkspace: React.FC<AdvocateWorkspaceProps> = ({ onSwitchTo
             onClick={() => setActiveTab('demand_notices')}
             className={`w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl transition-all ${
               activeTab === 'demand_notices'
-                ? 'bg-[#111827] text-white shadow-md'
-                : 'text-slate-700 hover:bg-[#b8ccb6] hover:text-slate-900'
+                ? 'bg-[#3B82F6] text-white shadow-sm'
+                : 'text-slate-300 hover:bg-[#334155] hover:text-white'
             }`}
           >
             <ShieldAlert className="h-4 w-4 shrink-0" />
@@ -186,8 +190,8 @@ export const AdvocateWorkspace: React.FC<AdvocateWorkspaceProps> = ({ onSwitchTo
                 setActiveTab('tasks');
               }}
               className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl transition-all ${activeTab === 'tasks'
-                  ? 'bg-[#111827] text-white shadow-md'
-                  : 'text-slate-700 hover:bg-[#b8ccb6] hover:text-slate-900'
+                  ? 'bg-[#334155] text-white'
+                  : 'text-slate-300 hover:bg-[#334155] hover:text-white'
                 }`}
             >
               <div className="flex items-center space-x-3">
@@ -201,10 +205,10 @@ export const AdvocateWorkspace: React.FC<AdvocateWorkspaceProps> = ({ onSwitchTo
               )}
             </button>
             {sidebarOpen && tasksOpen && (
-              <div className="pl-9 pr-2 py-1 space-y-1">
+              <div className="pl-8 pr-1 py-1 space-y-1 border-l border-[#334155] ml-4">
                 <button
                   onClick={() => setActiveTab('tasks')}
-                  className={`w-full text-left py-1.5 px-3 rounded-lg text-[11px] font-medium transition-all ${activeTab === 'tasks' ? 'bg-[#e2ede0] text-[#166534] font-bold' : 'text-slate-600 hover:text-slate-900'
+                  className={`w-full text-left py-1.5 px-3 rounded-lg text-[11px] font-medium transition-all ${activeTab === 'tasks' ? 'bg-[#3B82F6] text-white font-bold shadow-xs' : 'text-slate-400 hover:text-white hover:bg-[#334155]'
                     }`}
                 >
                   Action Items
@@ -216,25 +220,25 @@ export const AdvocateWorkspace: React.FC<AdvocateWorkspaceProps> = ({ onSwitchTo
 
         {/* Sidebar Footer */}
         {sidebarOpen && (
-          <div className="p-3 border-t border-[#b5cbb3]/60 text-center">
-            <span className="text-[10px] text-slate-600 font-medium">Settl Expert v1.0 • Legal Counsel</span>
+          <div className="p-3 border-t border-[#334155] text-center">
+            <span className="text-[10px] text-slate-400 font-medium">Settl Expert v1.0 • Legal Counsel</span>
           </div>
         )}
       </aside>
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0 overflow-hidden bg-[#f9fafb]">
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden bg-[#F8FAFC]">
         {/* Top Header Bar */}
-        <header className="h-14 bg-[#cadbc8] border-b border-[#b5cbb3] px-4 flex items-center justify-between shrink-0">
+        <header className="h-14 bg-white border-b border-[#E2E8F0] px-4 flex items-center justify-between shrink-0">
           {/* Left: Hamburger & Welcome Back */}
           <div className="flex items-center space-x-3">
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="p-1.5 rounded-lg hover:bg-[#b8ccb6] text-slate-700 transition-colors"
+              className="p-1.5 rounded-lg hover:bg-[#F8FAFC] text-slate-600 transition-colors"
             >
               <Menu className="h-5 w-5" />
             </button>
-            <span className="text-sm font-bold text-slate-800 tracking-tight">
+            <span className="text-sm font-bold text-[#1E293B] tracking-tight">
               Welcome Back!
             </span>
           </div>
@@ -244,7 +248,7 @@ export const AdvocateWorkspace: React.FC<AdvocateWorkspaceProps> = ({ onSwitchTo
             {/* Fullscreen Button */}
             <button
               onClick={toggleFullscreen}
-              className="p-1.5 rounded-lg hover:bg-[#b8ccb6] text-slate-700 transition-colors hidden sm:block"
+              className="p-1.5 rounded-lg hover:bg-[#F8FAFC] text-slate-600 transition-colors hidden sm:block cursor-pointer"
               title="Toggle Fullscreen"
             >
               <Maximize2 className="h-4 w-4" />
@@ -255,30 +259,30 @@ export const AdvocateWorkspace: React.FC<AdvocateWorkspaceProps> = ({ onSwitchTo
               <button
                 type="button"
                 onClick={() => setShowProfileMenu(!showProfileMenu)}
-                className="flex items-center space-x-2 p-1 pl-2 rounded-xl hover:bg-[#b8ccb6] transition-colors cursor-pointer"
+                className="flex items-center space-x-2 p-1 pl-2 rounded-xl hover:bg-[#F8FAFC] transition-colors cursor-pointer"
                 aria-label="Advocate profile menu"
                 aria-expanded={showProfileMenu}
               >
-                <div className="h-8 w-8 rounded-full bg-[#15803d] text-white flex items-center justify-center font-bold text-xs shadow-xs overflow-hidden shrink-0">
+                <div className="h-8 w-8 rounded-full bg-[#3B82F6] text-white flex items-center justify-center font-bold text-xs shadow-xs overflow-hidden shrink-0">
                   {user?.profile_image ? (
                     <img src={user.profile_image} alt={user.name} className="h-full w-full object-cover" />
                   ) : (
                     user?.name ? user.name.charAt(0) : 'A'
                   )}
                 </div>
-                <span className="text-xs font-bold text-slate-800 hidden md:block">
+                <span className="text-xs font-bold text-[#1E293B] hidden md:block">
                   {user?.name || 'Advocate'}
                 </span>
-                <ChevronDown className="h-3.5 w-3.5 text-slate-600" />
+                <ChevronDown className="h-3.5 w-3.5 text-slate-500" />
               </button>
 
               {/* Profile Dropdown Popup */}
               {showProfileMenu && (
-                <div className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-xl border border-gray-200 py-2 z-[100] animate-in fade-in zoom-in-95 duration-100">
-                  <div className="px-4 py-2 border-b border-gray-100">
-                    <p className="text-xs font-bold text-slate-900 truncate">{user?.name}</p>
-                    <p className="text-[11px] text-slate-500 truncate">{user?.email}</p>
-                    <span className="inline-block mt-1 px-2 py-0.5 rounded bg-emerald-100 text-[#166534] text-[10px] font-bold">
+                <div className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-xl border border-[#E2E8F0] py-2 z-[100] animate-in fade-in zoom-in-95 duration-100">
+                  <div className="px-4 py-2 border-b border-[#E2E8F0]">
+                    <p className="text-xs font-bold text-[#1E293B] truncate">{user?.name}</p>
+                    <p className="text-[11px] text-[#64748B] truncate">{user?.email}</p>
+                    <span className="inline-block mt-1 px-2 py-0.5 rounded bg-blue-50 text-[#2563EB] text-[10px] font-bold">
                       Empanelled Advocate Counsel
                     </span>
                   </div>
